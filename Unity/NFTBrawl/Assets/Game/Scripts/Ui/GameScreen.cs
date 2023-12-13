@@ -25,6 +25,8 @@ public class GameScreen : MonoBehaviour
     public TextMeshProUGUI WoodAmountText;
     public TextMeshProUGUI NextEnergyInText;
     public TextMeshProUGUI TotalLogAvailableText;
+    public TextMeshProUGUI PubKeyText;
+    public TMP_InputField usernameInput;
 
     public GameObject NotInitializedRoot;
     public GameObject InitializedRoot;
@@ -119,6 +121,11 @@ public class GameScreen : MonoBehaviour
         NotInitializedRoot.SetActive(!isInitialized);
         InitGameDataButton.gameObject.SetActive(!isInitialized && AnchorService.Instance.CurrentPlayerData == null);
         InitializedRoot.SetActive(isInitialized);
+
+        if (Web3.Account != null)
+        {
+            PubKeyText.text = Web3.Account.PublicKey;
+        }
 
         if (AnchorService.Instance.CurrentPlayerData == null)
         {
