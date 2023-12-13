@@ -70,3 +70,11 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+Program/deathbattle/.anchor
+Program/deathbattle/.DS_Store
+Program/deathbattle/target
+Program/deathbattle/**/*.rs.bk
+Program/deathbattle/node_modules
+Program/deathbattle/test-ledger
+Program/deathbattle/.yarn
