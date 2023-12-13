@@ -45,6 +45,20 @@ public class LoginScreen : MonoBehaviour
 
         AnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         AnchorService.OnInitialDataLoaded += UpdateContent;
+        AnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+    }
+
+    private void OnInitialDataLoaded()
+    {
+        if (Web3.Account != null)
+        {
+            var isInitialized = AnchorService.Instance.IsInitialized();
+
+            if (isInitialized)
+            {
+                SceneManager.LoadScene("LobbyScene");
+            }
+        }
     }
 
     private void OnDestroy()
@@ -81,13 +95,7 @@ public class LoginScreen : MonoBehaviour
     {
         if (Web3.Account != null)
         {
-            var isInitialized = AnchorService.Instance.IsInitialized();
-
-            if (isInitialized)
-            {
-                SceneManager.LoadScene("LobbyScene");
-            }
-            else if (!creatingProfile)
+            if (!creatingProfile)
             {
                 creatingProfile = true;
                 connectWalletScreen.gameObject.SetActive(false);
