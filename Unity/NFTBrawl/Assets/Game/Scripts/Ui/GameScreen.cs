@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /// <summary>
 /// This is the screen which handles the interaction with the anchor program.
@@ -17,6 +18,13 @@ using UnityEngine.UI;
 /// </summary>
 public class GameScreen : MonoBehaviour
 {
+    public static GameScreen instance;
+
+    [Header("Screens")]
+    public GraveyardController graveyardScreen;
+    public ProfileController profileScreen;
+
+    [Header("Misc")]
     public Button ChuckWoodSessionButton;
     public Button NftsButton;
     public Button InitGameDataButton;
@@ -33,11 +41,26 @@ public class GameScreen : MonoBehaviour
     public GameObject ActionFx;
     public GameObject ActionFxPosition;
     public GameObject Tree;
+
+    [Header("Prefabs")]
+    public GameObject brawlerPfb;
     
     private Vector3 CharacterStartPosition;
     private PlayerData currentPlayerData;
     private GameData currentGameData;
-    
+
+    public Action<int> FalledBrawlersUpdated;
+    public Action<ProfileController.Brawler> BrawlerRetrieved;
+
+    private List<ProfileController.Brawler> myBrawlers = new();
+
+    public List<ProfileController.Brawler> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
     void Start()
     {
         ChuckWoodSessionButton.onClick.AddListener(OnChuckWoodSessionButtonClicked);
@@ -122,11 +145,6 @@ public class GameScreen : MonoBehaviour
         InitGameDataButton.gameObject.SetActive(!isInitialized && AnchorService.Instance.CurrentPlayerData == null);
         InitializedRoot.SetActive(isInitialized);
 
-        if (Web3.Account != null)
-        {
-            PubKeyText.text = Web3.Account.PublicKey;
-        }
-
         if (AnchorService.Instance.CurrentPlayerData == null)
         {
             return;
@@ -167,5 +185,15 @@ public class GameScreen : MonoBehaviour
         {
             // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
         });
+    }
+
+    public void AttemptCreateBrawler()
+    {
+
+    }
+
+    public void AttemptReviveBrawler()
+    {
+
     }
 }

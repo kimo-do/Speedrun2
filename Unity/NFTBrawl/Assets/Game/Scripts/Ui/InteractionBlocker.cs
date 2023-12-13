@@ -8,7 +8,14 @@ public class InteractionBlocker : MonoBehaviour
     public TextMeshProUGUI CurrentTransactionsInProgress;
     public TextMeshProUGUI LastTransactionTimeText;
     public TextMeshProUGUI LastError;
-    
+
+    private CanvasGroup canvasGroup;
+
+    private void Awake()
+    {
+        canvasGroup = GetComponent<CanvasGroup>();
+    }
+
     void Update()
     {
         if (AnchorService.Instance == null)
@@ -21,5 +28,6 @@ public class InteractionBlocker : MonoBehaviour
                                              AnchorService.Instance.NonBlockingTransactionsInProgress).ToString();
         LastTransactionTimeText.text = $"Last took: {AnchorService.Instance.LastTransactionTimeInMs}ms";
         LastError.text = AnchorService.Instance.LastError;
+        canvasGroup.alpha = AnchorService.Instance.IsAnyBlockingTransactionInProgress ? 1f : 0f;
     }
 }
