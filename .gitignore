@@ -73,8 +73,15 @@ crashlytics-build.properties
 
 Program/deathbattle/.anchor
 Program/deathbattle/.DS_Store
-Program/deathbattle/target
+Program/deathbattle/target/debug
+Program/deathbattle/target/deploy
+Program/deathbattle/target/release
+Program/deathbattle/target/sbf-solana-solana
+Program/deathbattle/target/types
+Program/deathbattle/target/*.json
 Program/deathbattle/**/*.rs.bk
 Program/deathbattle/node_modules
 Program/deathbattle/test-ledger
 Program/deathbattle/.yarn
+Program/deathbattle/braw1mRTFfPNedZHiDMWsZgB2pwS3bss91QUB6oy4FX.json
+Program/deathbattle/BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ.json

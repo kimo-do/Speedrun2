@@ -36,7 +36,6 @@ impl<'info> JoinBrawl<'info> {
             err!(BrawlError::BrawlFull)?;
         }
 
-        ctx.accounts.brawler.mint = ctx.accounts.mint.key();
         ctx.accounts.brawler.owner = ctx.accounts.payer.key();
 
         Ok(())

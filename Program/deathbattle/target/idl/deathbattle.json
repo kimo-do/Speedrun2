@@ -1,0 +1,276 @@
+{
+  "version": "0.1.0",
+  "name": "deathbattle",
+  "constants": [
+    {
+      "name": "SEED",
+      "type": "string",
+      "value": "\"anchor\""
+    }
+  ],
+  "instructions": [
+    {
+      "name": "createCloneLab",
+      "accounts": [
+        {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone Lab account. This is keyed to the creator."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The creator of the Clone Lab. In most cases this will be the game's keypair managing the public lobby."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createClone",
+      "accounts": [
+        {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone Lab account. This will be used to store the clone."
+          ]
+        },
+        {
+          "name": "brawler",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone account. This is the account that will be created."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The player who is creating the clone and adding it to the Clone Lab."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "startBrawl",
+      "accounts": [
+        {
+          "name": "brawl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "joinBrawl",
+      "accounts": [
+        {
+          "name": "brawl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "brawler",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "runMatch",
+      "accounts": [
+        {
+          "name": "brawl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Brawl",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "queue",
+            "docs": [
+              "The queue of Brawler Pubkeys."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "matches",
+            "docs": [
+              "The match up list"
+            ],
+            "type": {
+              "vec": {
+                "defined": "Match"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Brawler",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "The owner of the clone."
+            ],
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CloneLab",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "numBrawlers",
+            "docs": [
+              "The number of brawlers in the Clone Lab."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "brawlers",
+            "docs": [
+              "A lists of the brawlers in the clone lab."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Match",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "brawlers",
+            "docs": [
+              "The indexes of the brawlers in the Brawl queue."
+            ],
+            "type": {
+              "defined": "(u8,u8)"
+            }
+          },
+          {
+            "name": "winner",
+            "docs": [
+              "The winner of the match."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "BrawlFull",
+      "msg": "The Brawl is full."
+    },
+    {
+      "code": 6001,
+      "name": "MissingBrawlerAccounts",
+      "msg": "Missing Brawler accounts."
+    }
+  ]
+}

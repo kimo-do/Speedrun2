@@ -9,12 +9,20 @@ use crate::instructions::*;
 pub use constants::*;
 pub use state::*;
 
-declare_id!("HyThTjyyi6DdCxbF7KeegYsnLogSR2CKfkzVVeJRaGk6");
+declare_id!("BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ");
 
 #[program]
 pub mod deathbattle {
 
     use super::*;
+
+    pub fn create_clone_lab(ctx: Context<CreateCloneLab>) -> Result<()> {
+        CreateCloneLab::handler(ctx)
+    }
+
+    pub fn create_clone(ctx: Context<CreateClone>) -> Result<()> {
+        CreateClone::handler(ctx)
+    }
 
     pub fn start_brawl(ctx: Context<StartBrawl>) -> Result<()> {
         StartBrawl::handler(ctx)

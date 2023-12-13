@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, TokenAccount};
 
-use crate::{error::BrawlError, Brawl, Brawler, MAX_BRAWLERS};
+use crate::{error::BrawlError, Brawl};
 
 #[derive(Accounts)]
 pub struct RunMatch<'info> {
