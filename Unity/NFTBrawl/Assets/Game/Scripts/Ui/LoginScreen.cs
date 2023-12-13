@@ -28,6 +28,7 @@ public class LoginScreen : MonoBehaviour
     public TextMeshProUGUI errorText;
 
     private bool creatingProfile = false;
+    private float loginTime;
 
     void Start()
     {
@@ -43,28 +44,36 @@ public class LoginScreen : MonoBehaviour
         loginWalletAdapterButton.onClick.AddListener(OnLoginWalletAdapterButtonClicked);
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
 
-        AnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        AnchorService.OnInitialDataLoaded += UpdateContent;
-        AnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+        BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
+        BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
+        BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
     }
 
     private void OnInitialDataLoaded()
     {
         if (Web3.Account != null)
         {
-            var isInitialized = AnchorService.Instance.IsInitialized();
+            var isInitialized = BrawlAnchorService.Instance.IsInitialized();
 
             if (isInitialized)
             {
                 SceneManager.LoadScene("LobbyScene");
+            }
+            else if (!creatingProfile)
+            {
+                creatingProfile = true;
+                connectWalletScreen.gameObject.SetActive(false);
+                createProfileScreen.gameObject.SetActive(true);
+                pubKeyText.text = Web3.Account.PublicKey;
+                usernameInput.text = "";
             }
         }
     }
 
     private void OnDestroy()
     {
-        AnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
-        AnchorService.OnInitialDataLoaded -= UpdateContent;
+        BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
+        BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
     }
 
     private async void OnLoginWalletAdapterButtonClicked()
@@ -83,7 +92,7 @@ public class LoginScreen : MonoBehaviour
         }
 
         // On local host we probably dont have the session key progeam, but can just sign with the in game wallet instead. 
-        await AnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"));
+        await BrawlAnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"));
     }
 
     private void OnPlayerDataChanged(PlayerData playerData)
@@ -95,13 +104,11 @@ public class LoginScreen : MonoBehaviour
     {
         if (Web3.Account != null)
         {
-            if (!creatingProfile)
+            var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+            if (!isInitialized)
             {
-                creatingProfile = true;
-                connectWalletScreen.gameObject.SetActive(false);
-                createProfileScreen.gameObject.SetActive(true);
-                pubKeyText.text = Web3.Account.PublicKey;
-                usernameInput.text = "";
+                loginTime = Time.time;
             }
         }
         else

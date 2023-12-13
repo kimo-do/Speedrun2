@@ -1,0 +1,1 @@
+dotnet anchorgen -i Program/deathbattle/target/idl/deathbattle.json -o Unity/NFTBrawl/Assets/Scripts/Solana/DeathBattle.cs

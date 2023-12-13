@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Deathbattle.Accounts;
 
 /// <summary>
 /// This is the screen which handles the interaction with the anchor program.
@@ -47,7 +48,7 @@ public class GameScreen : MonoBehaviour
     
     private Vector3 CharacterStartPosition;
     private PlayerData currentPlayerData;
-    private GameData currentGameData;
+    private CloneLab currentCloneLab;
 
     public Action<int> FalledBrawlersUpdated;
     public Action<ProfileController.Brawler> BrawlerRetrieved;
@@ -70,21 +71,21 @@ public class GameScreen : MonoBehaviour
         // In case we are not logged in yet load the LoginScene
         if (Web3.Account == null)
         {
-            SceneManager.LoadScene("LoginScene");
+            //SceneManager.LoadScene("LoginScene");
             return;
         }
-        StartCoroutine(UpdateNextEnergy());
+        //StartCoroutine(UpdateNextEnergy());
         
-        AnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        AnchorService.OnGameDataChanged += OnGameDataChanged;
-        AnchorService.OnInitialDataLoaded += UpdateContent;
+        //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
+        //BrawlAnchorService.OnCloneLabChanged += OnGameDataChanged;
+        //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
     }
 
     private void OnDestroy()
     {
-        AnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
-        AnchorService.OnGameDataChanged -= OnGameDataChanged;
-        AnchorService.OnInitialDataLoaded -= UpdateContent;
+        BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
+        BrawlAnchorService.OnCloneLabChanged -= OnGameDataChanged;
+        BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
     }
 
     private void OnEnable()
@@ -95,7 +96,7 @@ public class GameScreen : MonoBehaviour
     private async void OnInitGameDataButtonClicked()
     {
         // On local host we probably dont have the session key progeam, but can just sign with the in game wallet instead. 
-        await AnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"));
+        await BrawlAnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"));
     }
 
     private void OnNftsButtonClicked()
@@ -123,9 +124,10 @@ public class GameScreen : MonoBehaviour
         UpdateContent();
     }
 
-    private void OnGameDataChanged(GameData gameData)
+    private void OnGameDataChanged(CloneLab cloneLab)
     {
-        if (currentGameData != null && currentGameData.TotalWoodCollected != gameData.TotalWoodCollected)
+        /*
+        if (currentGameData != null && currentGameData.TotalWoodCollected != cloneLab.TotalWoodCollected)
         {
             Tree.transform.DOKill();
             Tree.transform.localScale = Vector3.one;
@@ -133,36 +135,40 @@ public class GameScreen : MonoBehaviour
             Instantiate(ActionFx, ActionFxPosition.transform.position, Quaternion.identity);
         }
 
-        var totalLogAvailable = AnchorService.MAX_WOOD_PER_TREE - gameData.TotalWoodCollected;
+        var totalLogAvailable = BrawlAnchorService.MAX_WOOD_PER_TREE - cloneLab.TotalWoodCollected;
         TotalLogAvailableText.text = totalLogAvailable + " Wood available.";
-        currentGameData = gameData;
+        currentGameData = cloneLab;
+        */
+        currentCloneLab = cloneLab;
     }
 
     private void UpdateContent()
     {
-        var isInitialized = AnchorService.Instance.IsInitialized();
+        return;
+
+        var isInitialized = BrawlAnchorService.Instance.IsInitialized();
         NotInitializedRoot.SetActive(!isInitialized);
-        InitGameDataButton.gameObject.SetActive(!isInitialized && AnchorService.Instance.CurrentPlayerData == null);
+        InitGameDataButton.gameObject.SetActive(!isInitialized && BrawlAnchorService.Instance.CurrentPlayerData == null);
         InitializedRoot.SetActive(isInitialized);
 
-        if (AnchorService.Instance.CurrentPlayerData == null)
+        if (BrawlAnchorService.Instance.CurrentPlayerData == null)
         {
             return;
         }
         
-        var lastLoginTime = AnchorService.Instance.CurrentPlayerData.LastLogin;
+        var lastLoginTime = BrawlAnchorService.Instance.CurrentPlayerData.LastLogin;
         var timePassed = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastLoginTime;
         
         while (
-            timePassed >= AnchorService.TIME_TO_REFILL_ENERGY &&
-            AnchorService.Instance.CurrentPlayerData.Energy < AnchorService.MAX_ENERGY
+            timePassed >= BrawlAnchorService.TIME_TO_REFILL_ENERGY &&
+            BrawlAnchorService.Instance.CurrentPlayerData.Energy < BrawlAnchorService.MAX_ENERGY
         ) {
-            AnchorService.Instance.CurrentPlayerData.Energy += 1;
-            AnchorService.Instance.CurrentPlayerData.LastLogin += AnchorService.TIME_TO_REFILL_ENERGY;
-            timePassed -= AnchorService.TIME_TO_REFILL_ENERGY;
+            BrawlAnchorService.Instance.CurrentPlayerData.Energy += 1;
+            BrawlAnchorService.Instance.CurrentPlayerData.LastLogin += BrawlAnchorService.TIME_TO_REFILL_ENERGY;
+            timePassed -= BrawlAnchorService.TIME_TO_REFILL_ENERGY;
         }
 
-        var timeUntilNextRefill = AnchorService.TIME_TO_REFILL_ENERGY - timePassed;
+        var timeUntilNextRefill = BrawlAnchorService.TIME_TO_REFILL_ENERGY - timePassed;
 
         if (timeUntilNextRefill > 0)
         {
@@ -173,15 +179,15 @@ public class GameScreen : MonoBehaviour
             NextEnergyInText.text = "";
         }
         
-        EnergyAmountText.text = AnchorService.Instance.CurrentPlayerData.Energy.ToString();
-        WoodAmountText.text = AnchorService.Instance.CurrentPlayerData.Wood.ToString();
+        EnergyAmountText.text = BrawlAnchorService.Instance.CurrentPlayerData.Energy.ToString();
+        WoodAmountText.text = BrawlAnchorService.Instance.CurrentPlayerData.Wood.ToString();
     }
 
     private void OnChuckWoodSessionButtonClicked()
     {
         ChuckWoodSessionButton.transform.localPosition = CharacterStartPosition;
         ChuckWoodSessionButton.transform.DOLocalMove(CharacterStartPosition + Vector3.up * 10, 0.3f);
-        AnchorService.Instance.ChopTree(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
+        BrawlAnchorService.Instance.ChopTree(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
         {
             // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
         });
@@ -194,6 +200,6 @@ public class GameScreen : MonoBehaviour
 
     public void AttemptReviveBrawler()
     {
-
+        GraveyardController.Instance.SummonEffect();
     }
 }
