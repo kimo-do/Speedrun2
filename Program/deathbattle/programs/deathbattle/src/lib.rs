@@ -20,6 +20,14 @@ pub mod deathbattle {
         CreateCloneLab::handler(ctx)
     }
 
+    pub fn create_colosseum(ctx: Context<CreateColosseum>) -> Result<()> {
+        CreateColosseum::handler(ctx)
+    }
+
+    pub fn create_graveyard(ctx: Context<CreateGraveyard>) -> Result<()> {
+        CreateGraveyard::handler(ctx)
+    }
+
     pub fn create_clone(ctx: Context<CreateClone>, args: CreateCloneArgs) -> Result<()> {
         CreateClone::handler(ctx, args)
     }

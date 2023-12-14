@@ -37,6 +37,60 @@
       "args": []
     },
     {
+      "name": "createColosseum",
+      "accounts": [
+        {
+          "name": "colosseum",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Colosseum account. This is keyed to the creator."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The creator of the Colosseum. In most cases this will be the game's keypair managing the public lobby."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createGraveyard",
+      "accounts": [
+        {
+          "name": "graveyard",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Graveyard account. This is keyed to the creator."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The creator of the Graveyard. In most cases this will be the game's keypair managing the public lobby."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createClone",
       "accounts": [
         {
@@ -237,6 +291,70 @@
               "The number of brawlers in the Clone Lab."
             ],
             "type": "u16"
+          },
+          {
+            "name": "brawlers",
+            "docs": [
+              "A lists of the brawlers in the clone lab."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Colosseum",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "numBrawls",
+            "docs": [
+              "The counter of total brawls."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "pendingBrawls",
+            "docs": [
+              "A list of the brawls filling up."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "activeBrawls",
+            "docs": [
+              "A list of the brawls ready to go."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Graveyard",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump."
+            ],
+            "type": "u8"
           },
           {
             "name": "brawlers",

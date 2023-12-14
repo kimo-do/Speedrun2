@@ -11,7 +11,12 @@ pub struct CreateCloneArgs {
 #[derive(Accounts)]
 pub struct CreateClone<'info> {
     /// The Clone Lab account. This will be used to store the clone.
-    #[account(mut)]
+    #[account(
+        mut,
+        realloc=clone_lab.len(),
+        realloc::payer=payer,
+        realloc::zero=false
+    )]
     pub clone_lab: Account<'info, CloneLab>,
 
     /// The Clone account. This is the account that will be created.

@@ -17,4 +17,8 @@ pub enum BrawlError {
     /// 1003 - Brawler name too long.
     #[msg("Brawler name too long.")]
     BrawlerNameTooLong,
+
+    /// 1003 - Invalid Brawl.
+    #[msg("Invalid Brawl.")]
+    InvalidBrawl,
 }
