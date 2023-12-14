@@ -10,6 +10,40 @@
   ],
   "instructions": [
     {
+      "name": "createProfile",
+      "accounts": [
+        {
+          "name": "profile",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Profile account. This is keyed to the creator."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The user creating the Profile."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "CreateProfileArgs"
+          }
+        }
+      ]
+    },
+    {
       "name": "createCloneLab",
       "accounts": [
         {
@@ -158,6 +192,11 @@
       "accounts": [
         {
           "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "colosseum",
           "isMut": true,
           "isSigner": false
         },
@@ -367,6 +406,28 @@
           }
         ]
       }
+    },
+    {
+      "name": "Profile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "username",
+            "docs": [
+              "The name of the clone."
+            ],
+            "type": "string"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -379,6 +440,21 @@
             "name": "name",
             "docs": [
               "The name of the clone."
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateProfileArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "username",
+            "docs": [
+              "The name of the profile."
             ],
             "type": "string"
           }
@@ -452,8 +528,13 @@
     },
     {
       "code": 6003,
-      "name": "BrawlerNameTooLong",
-      "msg": "Brawler name too long."
+      "name": "NameTooLong",
+      "msg": "Name too long."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidBrawl",
+      "msg": "Invalid Brawl."
     }
   ]
 }

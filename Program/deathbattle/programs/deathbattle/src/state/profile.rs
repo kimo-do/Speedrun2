@@ -3,17 +3,17 @@ use anchor_lang::prelude::*;
 use crate::MAX_NAME_LENGTH;
 
 #[account]
-pub struct Brawler {
+pub struct Profile {
     /// The PDA bump.
     pub bump: u8,
-    /// The owner of the clone.
-    pub owner: Pubkey,
     /// The name of the clone.
-    pub name: String,
+    pub username: String,
 }
 
-impl Brawler {
-    /// The length of the Brawler account.
+impl Profile {
+    /// The string prefix of the profile
+    pub const PREFIX: &'static str = "profile";
+    /// The length of the Profile account.
     pub const LEN: usize = 8 + // 8 byte discriminator
         1 + // 1 byte bump
         32 + // 32 byte owner

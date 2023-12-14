@@ -16,6 +16,10 @@ pub mod deathbattle {
 
     use super::*;
 
+    pub fn create_profile(ctx: Context<CreateProfile>, args: CreateProfileArgs) -> Result<()> {
+        CreateProfile::handler(ctx, args)
+    }
+
     pub fn create_clone_lab(ctx: Context<CreateCloneLab>) -> Result<()> {
         CreateCloneLab::handler(ctx)
     }

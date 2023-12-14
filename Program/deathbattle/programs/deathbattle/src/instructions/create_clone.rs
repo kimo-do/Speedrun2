@@ -45,7 +45,7 @@ impl<'info> CreateClone<'info> {
             .push(ctx.accounts.brawler.key());
 
         if args.name.len() > MAX_NAME_LENGTH {
-            return err!(BrawlError::BrawlerNameTooLong);
+            return err!(BrawlError::NameTooLong);
         } else {
             ctx.accounts.brawler.name = args.name;
         }

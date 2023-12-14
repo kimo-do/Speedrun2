@@ -15,7 +15,7 @@ pub struct CreateCloneLab<'info> {
     pub clone_lab: Account<'info, CloneLab>,
 
     /// The creator of the Clone Lab. In most cases this will be the game's keypair managing the public lobby.
-    #[account(signer, mut)]
+    #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
