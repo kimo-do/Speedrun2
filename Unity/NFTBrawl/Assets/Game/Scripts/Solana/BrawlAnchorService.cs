@@ -21,25 +21,27 @@ using Solana.Unity.Wallet;
 using Services;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Deathbattle;
+using Deathbattle.Accounts;
 
-public class AnchorService : MonoBehaviour
+public class BrawlAnchorService : MonoBehaviour
 {
-    public PublicKey AnchorProgramIdPubKey = new("MkabCfyUD6rBTaYHpgKBBpBo5qzWA2pK2hrGGKMurJt");
+    public PublicKey AnchorProgramIdPubKey = new("BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ");
 
     // Needs to be the same constants as in the anchor program
     public const int TIME_TO_REFILL_ENERGY = 60;
     public const int MAX_ENERGY = 100;
     public const int MAX_WOOD_PER_TREE = 100000;
 
-    public static AnchorService Instance { get; private set; }
+    public static BrawlAnchorService Instance { get; private set; }
     public static Action<PlayerData> OnPlayerDataChanged;
-    public static Action<GameData> OnGameDataChanged;
+    public static Action<CloneLab> OnCloneLabChanged;
     public static Action OnInitialDataLoaded;
 
     public bool IsAnyBlockingTransactionInProgress => blockingTransactionsInProgress > 0;
     public bool IsAnyNonBlockingTransactionInProgress => nonBlockingTransactionsInProgress > 0;
     public PlayerData CurrentPlayerData { get; private set; }
-    public GameData CurrentGameData { get; private set; }
+    public CloneLab CurrentCloneLab { get; private set; }
 
     public int BlockingTransactionsInProgress => blockingTransactionsInProgress;
     public int NonBlockingTransactionsInProgress => nonBlockingTransactionsInProgress;
@@ -50,7 +52,7 @@ public class AnchorService : MonoBehaviour
     private PublicKey PlayerDataPDA;
     private PublicKey GameDataPDA;
     private bool _isInitialized;
-    private LumberjackClient anchorClient;
+    private DeathbattleClient anchorClient;
     private int blockingTransactionsInProgress;
     private int nonBlockingTransactionsInProgress;
     private long? sessionValidUntil;
@@ -92,10 +94,10 @@ public class AnchorService : MonoBehaviour
 
         FindPDAs(account);
 
-        anchorClient = new LumberjackClient(Web3.Rpc, Web3.WsRpc, AnchorProgramIdPubKey);
+        anchorClient = new DeathbattleClient(Web3.Rpc, Web3.WsRpc, AnchorProgramIdPubKey);
 
-        await SubscribeToPlayerDataUpdates();
-        await SubscribeToGameDataUpdates();
+        //await SubscribeToPlayerDataUpdates();
+        await SubscribeToCloneLabUpdates();
 
         OnInitialDataLoaded?.Invoke();
     }
@@ -135,33 +137,33 @@ public class AnchorService : MonoBehaviour
         return DateTimeOffset.UtcNow.AddDays(6).ToUnixTimeSeconds();
     }
 
-    private async Task SubscribeToPlayerDataUpdates()
-    {
-        AccountResultWrapper<PlayerData> playerData = null;
+    //private async Task SubscribeToPlayerDataUpdates()
+    //{
+    //    AccountResultWrapper<PlayerData> playerData = null;
 
-        try
-        {
-            playerData = await anchorClient.GetPlayerDataAsync(PlayerDataPDA, Commitment.Confirmed);
-            if (playerData.ParsedResult != null)
-            {
-                CurrentPlayerData = playerData.ParsedResult;
-                OnPlayerDataChanged?.Invoke(playerData.ParsedResult);
-                _isInitialized = true;
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.Log("Probably playerData not available " + e.Message);
-        }
+    //    try
+    //    {
+    //        playerData = await anchorClient.GetPlayerDataAsync(PlayerDataPDA, Commitment.Confirmed);
+    //        if (playerData.ParsedResult != null)
+    //        {
+    //            CurrentPlayerData = playerData.ParsedResult;
+    //            OnPlayerDataChanged?.Invoke(playerData.ParsedResult);
+    //            _isInitialized = true;
+    //        }
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Debug.Log("Probably playerData not available " + e.Message);
+    //    }
 
-        if (playerData != null)
-        {
-            await anchorClient.SubscribePlayerDataAsync(PlayerDataPDA, (state, value, playerData) =>
-            {
-                OnReceivedPlayerDataUpdate(playerData);
-            }, Commitment.Processed);
-        }
-    }
+    //    if (playerData != null)
+    //    {
+    //        await anchorClient.SubscribePlayerDataAsync(PlayerDataPDA, (state, value, playerData) =>
+    //        {
+    //            OnReceivedPlayerDataUpdate(playerData);
+    //        }, Commitment.Processed);
+    //    }
+    //}
 
     private void OnReceivedPlayerDataUpdate(PlayerData playerData)
     {
@@ -172,17 +174,17 @@ public class AnchorService : MonoBehaviour
         OnPlayerDataChanged?.Invoke(playerData);
     }
 
-    private async Task SubscribeToGameDataUpdates()
+    private async Task SubscribeToCloneLabUpdates()
     {
-        AccountResultWrapper<GameData> gameData = null;
+        AccountResultWrapper<CloneLab> gameData = null;
 
         try
         {
-            gameData = await anchorClient.GetGameDataAsync(GameDataPDA, Commitment.Confirmed);
+            gameData = await anchorClient.GetCloneLabAsync(GameDataPDA, Commitment.Confirmed);
             if (gameData.ParsedResult != null)
             {
-                CurrentGameData = gameData.ParsedResult;
-                OnGameDataChanged?.Invoke(gameData.ParsedResult);
+                CurrentCloneLab = gameData.ParsedResult;
+                OnCloneLabChanged?.Invoke(gameData.ParsedResult);
             }
         }
         catch (Exception e)
@@ -192,18 +194,18 @@ public class AnchorService : MonoBehaviour
 
         if (gameData != null)
         {
-            await anchorClient.SubscribeGameDataAsync(GameDataPDA, (state, value, gameData) =>
+            await anchorClient.SubscribeCloneLabAsync(GameDataPDA, (state, value, gameData) =>
             {
-                OnRecievedGameDataUpdate(gameData);
+                OnReceivedCloneLabUpdate(gameData);
             }, Commitment.Processed);
         }
     }
 
-    private void OnRecievedGameDataUpdate(GameData gameData)
+    private void OnReceivedCloneLabUpdate(CloneLab cloneLab)
     {
-        Debug.Log($"Socket Message: Total log chopped  {gameData.TotalWoodCollected}.");
-        CurrentGameData = gameData;
-        OnGameDataChanged?.Invoke(gameData);
+        Debug.Log($"Socket Message: Total available brawlers: {cloneLab.Brawlers}.");
+        CurrentCloneLab = cloneLab;
+        OnCloneLabChanged?.Invoke(cloneLab);
     }
 
     public async Task InitAccounts(bool useSession)
@@ -243,8 +245,8 @@ public class AnchorService : MonoBehaviour
             () => { Debug.Log("Init account was successful"); }, s => { Debug.LogError("Init was not successful"); });
 
         await UpdateSessionValid();
-        await SubscribeToPlayerDataUpdates();
-        await SubscribeToGameDataUpdates();
+        //await SubscribeToPlayerDataUpdates();
+        await SubscribeToCloneLabUpdates();
     }
 
     private async Task<bool> SendAndConfirmTransaction(WalletBase wallet, Transaction transaction, string label = "",
@@ -351,9 +353,9 @@ public class AnchorService : MonoBehaviour
             await SendAndConfirmTransaction(Web3.Wallet, transaction, "Chop Tree without session.", onSucccess: onSuccess);
         }
 
-        if (CurrentGameData == null)
+        if (CurrentCloneLab == null)
         {
-            await SubscribeToGameDataUpdates();
+            await SubscribeToCloneLabUpdates();
         }
     }
 

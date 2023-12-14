@@ -24,7 +24,7 @@ public class ProfileController : MonoBehaviour
 
         //PositionGameObjects();
         noBrawlers.gameObject.SetActive(true);
-        //yourBrawlers.gameObject.SetActive(false);
+        yourBrawlers.gameObject.SetActive(false);
     }
 
     private void OnBrawlersUpdated(Brawler brawler)

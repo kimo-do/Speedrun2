@@ -18,16 +18,16 @@ public class InteractionBlocker : MonoBehaviour
 
     void Update()
     {
-        if (AnchorService.Instance == null)
+        if (BrawlAnchorService.Instance == null)
         {
             return;
         }
-        BlockingSpinner.gameObject.SetActive(AnchorService.Instance.IsAnyBlockingTransactionInProgress);
-        NonBlocking.gameObject.SetActive(AnchorService.Instance.IsAnyNonBlockingTransactionInProgress);
-        CurrentTransactionsInProgress.text = (AnchorService.Instance.BlockingTransactionsInProgress +
-                                             AnchorService.Instance.NonBlockingTransactionsInProgress).ToString();
-        LastTransactionTimeText.text = $"Last took: {AnchorService.Instance.LastTransactionTimeInMs}ms";
-        LastError.text = AnchorService.Instance.LastError;
-        canvasGroup.alpha = AnchorService.Instance.IsAnyBlockingTransactionInProgress ? 1f : 0f;
+        BlockingSpinner.gameObject.SetActive(BrawlAnchorService.Instance.IsAnyBlockingTransactionInProgress);
+        NonBlocking.gameObject.SetActive(BrawlAnchorService.Instance.IsAnyNonBlockingTransactionInProgress);
+        CurrentTransactionsInProgress.text = (BrawlAnchorService.Instance.BlockingTransactionsInProgress +
+                                             BrawlAnchorService.Instance.NonBlockingTransactionsInProgress).ToString();
+        LastTransactionTimeText.text = $"Last took: {BrawlAnchorService.Instance.LastTransactionTimeInMs}ms";
+        LastError.text = BrawlAnchorService.Instance.LastError;
+        canvasGroup.alpha = BrawlAnchorService.Instance.IsAnyBlockingTransactionInProgress || BrawlAnchorService.Instance.IsAnyNonBlockingTransactionInProgress ? 1f : 0f;
     }
 }

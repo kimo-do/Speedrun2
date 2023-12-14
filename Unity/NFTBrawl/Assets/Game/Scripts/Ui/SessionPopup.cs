@@ -43,7 +43,7 @@ namespace Game.Scripts.Ui
 
         private async void UpdateSessionToken()
         {
-            var sessionToken = await AnchorService.Instance.RequestSessionToken();
+            var sessionToken = await BrawlAnchorService.Instance.RequestSessionToken();
             if (sessionToken == null)
             {
                 SessionExpiryText.text = "Session expired";
@@ -66,7 +66,7 @@ namespace Game.Scripts.Ui
         private async void OnRevokeSessionButtonClicked()
         {
             LoadingSpinner.gameObject.SetActive(true);
-            await AnchorService.Instance.RevokeSession();
+            await BrawlAnchorService.Instance.RevokeSession();
             LoadingSpinner.gameObject.SetActive(false);
             UpdateSessionToken();
         }
@@ -74,7 +74,7 @@ namespace Game.Scripts.Ui
         private async void OnCreatSessionWalletButtonClicked()
         {
             LoadingSpinner.gameObject.SetActive(true);
-            await AnchorService.Instance.CreateNewSession();
+            await BrawlAnchorService.Instance.CreateNewSession();
             LoadingSpinner.gameObject.SetActive(false);
             UpdateSessionToken();
             Close();
