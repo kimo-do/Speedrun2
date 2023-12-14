@@ -77,6 +77,8 @@ namespace Deathbattle
 
             public PublicKey Owner { get; set; }
 
+            public string Name { get; set; }
+
             public static Brawler Deserialize(ReadOnlySpan<byte> _data)
             {
                 int offset = 0;
@@ -92,6 +94,8 @@ namespace Deathbattle
                 offset += 1;
                 result.Owner = _data.GetPubKey(offset);
                 offset += 32;
+                offset += _data.GetBorshString(offset, out var resultName);
+                result.Name = resultName;
                 return result;
             }
         }
@@ -141,15 +145,81 @@ namespace Deathbattle
         public enum DeathbattleErrorKind : uint
         {
             BrawlFull = 6000U,
-            MissingBrawlerAccounts = 6001U
+            MissingBrawlerAccounts = 6001U,
+            InvalidBrawler = 6002U,
+            BrawlerNameTooLong = 6003U
         }
     }
 
     namespace Types
     {
+        public partial class CreateCloneArgs
+        {
+            public string Name { get; set; }
+
+            public int Serialize(byte[] _data, int initialOffset)
+            {
+                int offset = initialOffset;
+                offset += _data.WriteBorshString(Name, offset);
+                return offset - initialOffset;
+            }
+
+            public static int Deserialize(ReadOnlySpan<byte> _data, int initialOffset, out CreateCloneArgs result)
+            {
+                int offset = initialOffset;
+                result = new CreateCloneArgs();
+                offset += _data.GetBorshString(offset, out var resultName);
+                result.Name = resultName;
+                return offset - initialOffset;
+            }
+        }
+
+        public partial class JoinBrawlArgs
+        {
+            public PublicKey Brawler { get; set; }
+
+            public byte? IndexHint { get; set; }
+
+            public int Serialize(byte[] _data, int initialOffset)
+            {
+                int offset = initialOffset;
+                _data.WritePubKey(Brawler, offset);
+                offset += 32;
+                if (IndexHint != null)
+                {
+                    _data.WriteU8(1, offset);
+                    offset += 1;
+                    _data.WriteU8(IndexHint.Value, offset);
+                    offset += 1;
+                }
+                else
+                {
+                    _data.WriteU8(0, offset);
+                    offset += 1;
+                }
+
+                return offset - initialOffset;
+            }
+
+            public static int Deserialize(ReadOnlySpan<byte> _data, int initialOffset, out JoinBrawlArgs result)
+            {
+                int offset = initialOffset;
+                result = new JoinBrawlArgs();
+                result.Brawler = _data.GetPubKey(offset);
+                offset += 32;
+                if (_data.GetBool(offset++))
+                {
+                    result.IndexHint = _data.GetU8(offset);
+                    offset += 1;
+                }
+
+                return offset - initialOffset;
+            }
+        }
+
         public partial class Match
         {
-            public (byte,byte) Brawlers { get; set; }
+            public (byte, byte) Brawlers { get; set; }
 
             public byte Winner { get; set; }
 
@@ -296,9 +366,9 @@ namespace Deathbattle
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
-        public async Task<RequestResult<string>> SendCreateCloneAsync(CreateCloneAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public async Task<RequestResult<string>> SendCreateCloneAsync(CreateCloneAccounts accounts, CreateCloneArgs args, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
         {
-            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateClone(accounts, programId);
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateClone(accounts, args, programId);
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
@@ -308,9 +378,9 @@ namespace Deathbattle
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
-        public async Task<RequestResult<string>> SendJoinBrawlAsync(JoinBrawlAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public async Task<RequestResult<string>> SendJoinBrawlAsync(JoinBrawlAccounts accounts, JoinBrawlArgs args, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
         {
-            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.JoinBrawl(accounts, programId);
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.JoinBrawl(accounts, args, programId);
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
@@ -322,7 +392,7 @@ namespace Deathbattle
 
         protected override Dictionary<uint, ProgramError<DeathbattleErrorKind>> BuildErrorsDictionary()
         {
-            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, };
+            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlerNameTooLong, "Brawler name too long.")}, };
         }
     }
 
@@ -359,13 +429,11 @@ namespace Deathbattle
 
         public class JoinBrawlAccounts
         {
+            public PublicKey CloneLab { get; set; }
+
             public PublicKey Brawl { get; set; }
 
             public PublicKey Brawler { get; set; }
-
-            public PublicKey Mint { get; set; }
-
-            public PublicKey TokenAccount { get; set; }
 
             public PublicKey Payer { get; set; }
 
@@ -394,7 +462,7 @@ namespace Deathbattle
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction CreateClone(CreateCloneAccounts accounts, PublicKey programId)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction CreateClone(CreateCloneAccounts accounts, CreateCloneArgs args, PublicKey programId)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
                 {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
@@ -402,6 +470,7 @@ namespace Deathbattle
                 int offset = 0;
                 _data.WriteU64(16122771911115072516UL, offset);
                 offset += 8;
+                offset += args.Serialize(_data, offset);
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
@@ -420,14 +489,15 @@ namespace Deathbattle
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction JoinBrawl(JoinBrawlAccounts accounts, PublicKey programId)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction JoinBrawl(JoinBrawlAccounts accounts, JoinBrawlArgs args, PublicKey programId)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Mint, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.TokenAccount, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(2932231159124621166UL, offset);
                 offset += 8;
+                offset += args.Serialize(_data, offset);
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
