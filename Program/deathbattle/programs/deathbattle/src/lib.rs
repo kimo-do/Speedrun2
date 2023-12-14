@@ -20,16 +20,16 @@ pub mod deathbattle {
         CreateCloneLab::handler(ctx)
     }
 
-    pub fn create_clone(ctx: Context<CreateClone>) -> Result<()> {
-        CreateClone::handler(ctx)
+    pub fn create_clone(ctx: Context<CreateClone>, args: CreateCloneArgs) -> Result<()> {
+        CreateClone::handler(ctx, args)
     }
 
     pub fn start_brawl(ctx: Context<StartBrawl>) -> Result<()> {
         StartBrawl::handler(ctx)
     }
 
-    pub fn join_brawl(ctx: Context<JoinBrawl>) -> Result<()> {
-        JoinBrawl::handler(ctx)
+    pub fn join_brawl(ctx: Context<JoinBrawl>, args: JoinBrawlArgs) -> Result<()> {
+        JoinBrawl::handler(ctx, args)
     }
 
     pub fn run_match(ctx: Context<RunMatch>) -> Result<()> {

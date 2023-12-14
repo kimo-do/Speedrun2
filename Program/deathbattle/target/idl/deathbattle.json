@@ -69,7 +69,14 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "CreateCloneArgs"
+          }
+        }
+      ]
     },
     {
       "name": "startBrawl",
@@ -96,22 +103,17 @@
       "name": "joinBrawl",
       "accounts": [
         {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "brawl",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "brawler",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -126,7 +128,14 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "JoinBrawlArgs"
+          }
+        }
+      ]
     },
     {
       "name": "runMatch",
@@ -199,6 +208,13 @@
               "The owner of the clone."
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the clone."
+            ],
+            "type": "string"
           }
         ]
       }
@@ -237,6 +253,45 @@
   ],
   "types": [
     {
+      "name": "CreateCloneArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "docs": [
+              "The name of the clone."
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JoinBrawlArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "brawler",
+            "docs": [
+              "The address of the Brawler."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "indexHint",
+            "docs": [
+              "The rough index of the brawler in the Brawl queue."
+            ],
+            "type": {
+              "option": "u8"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Match",
       "type": {
         "kind": "struct",
@@ -271,6 +326,16 @@
       "code": 6001,
       "name": "MissingBrawlerAccounts",
       "msg": "Missing Brawler accounts."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidBrawler",
+      "msg": "Invalid Brawler."
+    },
+    {
+      "code": 6003,
+      "name": "BrawlerNameTooLong",
+      "msg": "Brawler name too long."
     }
   ]
 }

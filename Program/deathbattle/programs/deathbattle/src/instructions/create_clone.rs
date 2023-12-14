@@ -1,6 +1,12 @@
 use anchor_lang::prelude::*;
 
-use crate::{Brawler, CloneLab};
+use crate::{error::BrawlError, Brawler, CloneLab, MAX_NAME_LENGTH};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, PartialEq)]
+pub struct CreateCloneArgs {
+    /// The name of the clone.
+    pub name: String,
+}
 
 #[derive(Accounts)]
 pub struct CreateClone<'info> {
@@ -25,13 +31,19 @@ pub struct CreateClone<'info> {
 }
 
 impl<'info> CreateClone<'info> {
-    pub fn handler(ctx: Context<CreateClone>) -> Result<()> {
+    pub fn handler(ctx: Context<CreateClone>, args: CreateCloneArgs) -> Result<()> {
         ctx.accounts.brawler.bump = ctx.bumps.brawler;
         ctx.accounts.clone_lab.num_brawlers += 1;
         ctx.accounts
             .clone_lab
             .brawlers
             .push(ctx.accounts.brawler.key());
+
+        if args.name.len() > MAX_NAME_LENGTH {
+            return err!(BrawlError::BrawlerNameTooLong);
+        } else {
+            ctx.accounts.brawler.name = args.name;
+        }
 
         Ok(())
     }

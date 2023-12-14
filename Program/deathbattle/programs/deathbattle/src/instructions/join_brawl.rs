@@ -1,42 +1,46 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, TokenAccount};
 
-use crate::{error::BrawlError, Brawl, Brawler, MAX_BRAWLERS};
+use crate::{error::BrawlError, Brawl, Brawler, CloneLab, MAX_BRAWLERS};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, PartialEq)]
+pub struct JoinBrawlArgs {
+    /// The address of the Brawler.
+    pub brawler: Pubkey,
+    /// The rough index of the brawler in the Brawl queue.
+    pub index_hint: Option<u8>,
+}
 
 #[derive(Accounts)]
 pub struct JoinBrawl<'info> {
     #[account(mut)]
+    pub clone_lab: Account<'info, CloneLab>,
+    #[account(mut)]
     pub brawl: Account<'info, Brawl>,
-    #[account(
-        init_if_needed,
-        payer=payer,
-        space=Brawl::LEN,
-        seeds=[b"brawler".as_ref(), mint.key().as_ref(), payer.key().as_ref()],
-        bump
-    )]
     pub brawler: Account<'info, Brawler>,
-    pub mint: Account<'info, Mint>,
-    #[account(
-        token::mint = mint,
-        token::authority = payer,
-    )]
-    pub token_account: Account<'info, TokenAccount>,
-    #[account(signer, mut)]
+    #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> JoinBrawl<'info> {
-    pub fn handler(ctx: Context<JoinBrawl>) -> Result<()> {
-        ctx.accounts.brawler.bump = ctx.bumps.brawler;
-
-        if ctx.accounts.brawl.queue.len() < (MAX_BRAWLERS - 1) {
-            ctx.accounts.brawl.queue.push(ctx.accounts.brawler.key());
+    pub fn handler(ctx: Context<JoinBrawl>, args: JoinBrawlArgs) -> Result<()> {
+        if let Some(index) = ctx
+            .accounts
+            .clone_lab
+            .brawlers
+            .iter()
+            .position(|value| *value == args.brawler)
+        {
+            ctx.accounts.clone_lab.brawlers.swap_remove(index);
         } else {
-            err!(BrawlError::BrawlFull)?;
+            return err!(BrawlError::InvalidBrawler);
         }
 
-        ctx.accounts.brawler.owner = ctx.accounts.payer.key();
+        if ctx.accounts.brawl.queue.len() == MAX_BRAWLERS {
+            return err!(BrawlError::BrawlFull);
+        } else {
+            ctx.accounts.brawl.queue.push(args.brawler);
+        }
 
         Ok(())
     }
