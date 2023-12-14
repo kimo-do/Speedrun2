@@ -92,7 +92,7 @@ public class LoginScreen : MonoBehaviour
         }
 
         // On local host we probably dont have the session key progeam, but can just sign with the in game wallet instead. 
-        await BrawlAnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"));
+        await BrawlAnchorService.Instance.InitAccounts(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), usernameInput.text);
     }
 
     private void OnPlayerDataChanged(PlayerData playerData)

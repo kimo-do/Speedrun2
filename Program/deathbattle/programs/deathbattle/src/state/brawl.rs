@@ -4,8 +4,10 @@ use crate::MAX_MATCHES;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, PartialEq)]
 pub struct Match {
-    /// The indexes of the brawlers in the Brawl queue.
-    pub brawlers: (u8, u8),
+    /// The index of the first brawler.
+    pub brawler0: u8,
+    /// The index of the second brawler.
+    pub brawler1: u8,
     /// The winner of the match.
     pub winner: u8,
 }

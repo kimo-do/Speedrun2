@@ -23,6 +23,8 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Deathbattle;
 using Deathbattle.Accounts;
+using Deathbattle.Program;
+using Deathbattle.Types;
 
 public class BrawlAnchorService : MonoBehaviour
 {
@@ -51,6 +53,7 @@ public class BrawlAnchorService : MonoBehaviour
     private SessionWallet sessionWallet;
     private PublicKey PlayerDataPDA;
     private PublicKey GameDataPDA;
+    private PublicKey ProfilePDA;
     private bool _isInitialized;
     private DeathbattleClient anchorClient;
     private int blockingTransactionsInProgress;
@@ -111,6 +114,10 @@ public class BrawlAnchorService : MonoBehaviour
         PublicKey.TryFindProgramAddress(new[]
                 {Encoding.UTF8.GetBytes(levelSeed)},
             AnchorProgramIdPubKey, out GameDataPDA, out byte bump2);
+
+        PublicKey.TryFindProgramAddress(new[]
+                {Encoding.UTF8.GetBytes("profile"), account.PublicKey.KeyBytes},
+            AnchorProgramIdPubKey, out ProfilePDA, out byte profileBump);
     }
 
     private static async Task RequestAirdropIfSolValueIsLow()
@@ -208,7 +215,7 @@ public class BrawlAnchorService : MonoBehaviour
         OnCloneLabChanged?.Invoke(cloneLab);
     }
 
-    public async Task InitAccounts(bool useSession)
+    public async Task InitAccounts(bool useSession, string username)
     {
         var tx = new Transaction()
         {
@@ -217,13 +224,21 @@ public class BrawlAnchorService : MonoBehaviour
             RecentBlockHash = await Web3.BlockHash()
         };
 
-        InitPlayerAccounts accounts = new InitPlayerAccounts();
-        accounts.Player = PlayerDataPDA;
-        accounts.GameData = GameDataPDA;
-        accounts.Signer = Web3.Account;
-        accounts.SystemProgram = SystemProgram.ProgramIdKey;
+        // InitPlayerAccounts accounts = new InitPlayerAccounts();
+        // accounts.Player = PlayerDataPDA;
+        // accounts.GameData = GameDataPDA;
+        // accounts.Signer = Web3.Account;
+        // accounts.SystemProgram = SystemProgram.ProgramIdKey;
 
-        var initTx = LumberjackProgram.InitPlayer(accounts, levelSeed, AnchorProgramIdPubKey);
+        CreateProfileAccounts cpaAccounts = new CreateProfileAccounts();
+        cpaAccounts.Payer = Web3.Account;
+        cpaAccounts.SystemProgram = SystemProgram.ProgramIdKey;
+        cpaAccounts.Profile = ProfilePDA;
+
+        CreateProfileArgs cpaArgs = new CreateProfileArgs();
+        cpaArgs.Username = username;
+
+        var initTx = DeathbattleProgram.CreateProfile(cpaAccounts, cpaArgs, AnchorProgramIdPubKey);
         tx.Add(initTx);
 
         if (true)
@@ -234,7 +249,7 @@ public class BrawlAnchorService : MonoBehaviour
 
                 var validity = GetSessionKeysEndTime();
                 var createSessionIX = sessionWallet.CreateSessionIX(topUp, validity);
-                accounts.Signer = Web3.Account.PublicKey;
+                cpaAccounts.Payer = Web3.Account.PublicKey;
                 tx.Add(createSessionIX);
                 Debug.Log("Has no session -> partial sign");
                 tx.PartialSign(new[] {Web3.Account, sessionWallet.Account});

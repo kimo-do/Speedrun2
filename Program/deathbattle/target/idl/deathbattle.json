@@ -491,13 +491,18 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "brawlers",
+            "name": "brawler0",
             "docs": [
-              "The indexes of the brawlers in the Brawl queue."
+              "The index of the first brawler."
             ],
-            "type": {
-              "defined": "(u8,u8)"
-            }
+            "type": "u8"
+          },
+          {
+            "name": "brawler1",
+            "docs": [
+              "The index of the second brawler."
+            ],
+            "type": "u8"
           },
           {
             "name": "winner",

@@ -138,6 +138,119 @@ namespace Deathbattle
                 return result;
             }
         }
+
+        public partial class Colosseum
+        {
+            public static ulong ACCOUNT_DISCRIMINATOR => 315776606391033891UL;
+            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{35, 224, 80, 132, 38, 221, 97, 4};
+            public static string ACCOUNT_DISCRIMINATOR_B58 => "713aDhnJNK5";
+            public byte Bump { get; set; }
+
+            public uint NumBrawls { get; set; }
+
+            public PublicKey[] PendingBrawls { get; set; }
+
+            public PublicKey[] ActiveBrawls { get; set; }
+
+            public static Colosseum Deserialize(ReadOnlySpan<byte> _data)
+            {
+                int offset = 0;
+                ulong accountHashValue = _data.GetU64(offset);
+                offset += 8;
+                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                {
+                    return null;
+                }
+
+                Colosseum result = new Colosseum();
+                result.Bump = _data.GetU8(offset);
+                offset += 1;
+                result.NumBrawls = _data.GetU32(offset);
+                offset += 4;
+                int resultPendingBrawlsLength = (int)_data.GetU32(offset);
+                offset += 4;
+                result.PendingBrawls = new PublicKey[resultPendingBrawlsLength];
+                for (uint resultPendingBrawlsIdx = 0; resultPendingBrawlsIdx < resultPendingBrawlsLength; resultPendingBrawlsIdx++)
+                {
+                    result.PendingBrawls[resultPendingBrawlsIdx] = _data.GetPubKey(offset);
+                    offset += 32;
+                }
+
+                int resultActiveBrawlsLength = (int)_data.GetU32(offset);
+                offset += 4;
+                result.ActiveBrawls = new PublicKey[resultActiveBrawlsLength];
+                for (uint resultActiveBrawlsIdx = 0; resultActiveBrawlsIdx < resultActiveBrawlsLength; resultActiveBrawlsIdx++)
+                {
+                    result.ActiveBrawls[resultActiveBrawlsIdx] = _data.GetPubKey(offset);
+                    offset += 32;
+                }
+
+                return result;
+            }
+        }
+
+        public partial class Graveyard
+        {
+            public static ulong ACCOUNT_DISCRIMINATOR => 12796968033564238423UL;
+            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{87, 34, 160, 18, 160, 246, 151, 177};
+            public static string ACCOUNT_DISCRIMINATOR_B58 => "FaKdG6FbYdW";
+            public byte Bump { get; set; }
+
+            public PublicKey[] Brawlers { get; set; }
+
+            public static Graveyard Deserialize(ReadOnlySpan<byte> _data)
+            {
+                int offset = 0;
+                ulong accountHashValue = _data.GetU64(offset);
+                offset += 8;
+                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                {
+                    return null;
+                }
+
+                Graveyard result = new Graveyard();
+                result.Bump = _data.GetU8(offset);
+                offset += 1;
+                int resultBrawlersLength = (int)_data.GetU32(offset);
+                offset += 4;
+                result.Brawlers = new PublicKey[resultBrawlersLength];
+                for (uint resultBrawlersIdx = 0; resultBrawlersIdx < resultBrawlersLength; resultBrawlersIdx++)
+                {
+                    result.Brawlers[resultBrawlersIdx] = _data.GetPubKey(offset);
+                    offset += 32;
+                }
+
+                return result;
+            }
+        }
+
+        public partial class Profile
+        {
+            public static ulong ACCOUNT_DISCRIMINATOR => 13582644681592104376UL;
+            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{184, 101, 165, 188, 95, 63, 127, 188};
+            public static string ACCOUNT_DISCRIMINATOR_B58 => "XqtBdGS7oVD";
+            public byte Bump { get; set; }
+
+            public string Username { get; set; }
+
+            public static Profile Deserialize(ReadOnlySpan<byte> _data)
+            {
+                int offset = 0;
+                ulong accountHashValue = _data.GetU64(offset);
+                offset += 8;
+                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                {
+                    return null;
+                }
+
+                Profile result = new Profile();
+                result.Bump = _data.GetU8(offset);
+                offset += 1;
+                offset += _data.GetBorshString(offset, out var resultUsername);
+                result.Username = resultUsername;
+                return result;
+            }
+        }
     }
 
     namespace Errors
@@ -147,7 +260,8 @@ namespace Deathbattle
             BrawlFull = 6000U,
             MissingBrawlerAccounts = 6001U,
             InvalidBrawler = 6002U,
-            BrawlerNameTooLong = 6003U
+            NameTooLong = 6003U,
+            InvalidBrawl = 6004U
         }
     }
 
@@ -170,6 +284,27 @@ namespace Deathbattle
                 result = new CreateCloneArgs();
                 offset += _data.GetBorshString(offset, out var resultName);
                 result.Name = resultName;
+                return offset - initialOffset;
+            }
+        }
+
+        public partial class CreateProfileArgs
+        {
+            public string Username { get; set; }
+
+            public int Serialize(byte[] _data, int initialOffset)
+            {
+                int offset = initialOffset;
+                offset += _data.WriteBorshString(Username, offset);
+                return offset - initialOffset;
+            }
+
+            public static int Deserialize(ReadOnlySpan<byte> _data, int initialOffset, out CreateProfileArgs result)
+            {
+                int offset = initialOffset;
+                result = new CreateProfileArgs();
+                offset += _data.GetBorshString(offset, out var resultUsername);
+                result.Username = resultUsername;
                 return offset - initialOffset;
             }
         }
@@ -219,41 +354,35 @@ namespace Deathbattle
 
         public partial class Match
         {
-            public (byte, byte) Brawlers { get; set; }
+            public byte Brawler0 { get; set; }
+
+            public byte Brawler1 { get; set; }
 
             public byte Winner { get; set; }
 
             public int Serialize(byte[] _data, int initialOffset)
             {
                 int offset = initialOffset;
-                offset += SerializeBrawlers(_data, offset);
+                _data.WriteU8(Brawler0, offset);
+                offset += 1;
+                _data.WriteU8(Brawler1, offset);
+                offset += 1;
                 _data.WriteU8(Winner, offset);
                 offset += 1;
                 return offset - initialOffset;
-            }
-
-            private int SerializeBrawlers(byte[] data, int offset)
-            {
-                data[offset] = Brawlers.Item1;
-                data[offset + 1] = Brawlers.Item2;
-                return 2; // Two bytes were written
             }
 
             public static int Deserialize(ReadOnlySpan<byte> _data, int initialOffset, out Match result)
             {
                 int offset = initialOffset;
                 result = new Match();
-                DeserializeBrawlers(_data, offset, out var resultBrawlers);
-                result.Brawlers = resultBrawlers;
-                offset += 2; // Increase offset by 2, as two bytes are read for Brawlers
+                result.Brawler0 = _data.GetU8(offset);
+                offset += 1;
+                result.Brawler1 = _data.GetU8(offset);
+                offset += 1;
                 result.Winner = _data.GetU8(offset);
                 offset += 1;
                 return offset - initialOffset;
-            }
-
-            private static void DeserializeBrawlers(ReadOnlySpan<byte> data, int offset, out (byte, byte) brawlers)
-            {
-                brawlers = (data[offset], data[offset + 1]);
             }
         }
     }
@@ -297,6 +426,39 @@ namespace Deathbattle
             return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<CloneLab>>(res, resultingAccounts);
         }
 
+        public async Task<Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Colosseum>>> GetColosseumsAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<Solana.Unity.Rpc.Models.MemCmp>{new Solana.Unity.Rpc.Models.MemCmp{Bytes = Colosseum.ACCOUNT_DISCRIMINATOR_B58, Offset = 0}};
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Colosseum>>(res);
+            List<Colosseum> resultingAccounts = new List<Colosseum>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Colosseum.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Colosseum>>(res, resultingAccounts);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Graveyard>>> GetGraveyardsAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<Solana.Unity.Rpc.Models.MemCmp>{new Solana.Unity.Rpc.Models.MemCmp{Bytes = Graveyard.ACCOUNT_DISCRIMINATOR_B58, Offset = 0}};
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Graveyard>>(res);
+            List<Graveyard> resultingAccounts = new List<Graveyard>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Graveyard.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Graveyard>>(res, resultingAccounts);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Profile>>> GetProfilesAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<Solana.Unity.Rpc.Models.MemCmp>{new Solana.Unity.Rpc.Models.MemCmp{Bytes = Profile.ACCOUNT_DISCRIMINATOR_B58, Offset = 0}};
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Profile>>(res);
+            List<Profile> resultingAccounts = new List<Profile>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Profile.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Profile>>(res, resultingAccounts);
+        }
+
         public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<Brawl>> GetBrawlAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
         {
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
@@ -322,6 +484,33 @@ namespace Deathbattle
                 return new Solana.Unity.Programs.Models.AccountResultWrapper<CloneLab>(res);
             var resultingAccount = CloneLab.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new Solana.Unity.Programs.Models.AccountResultWrapper<CloneLab>(res, resultingAccount);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<Colosseum>> GetColosseumAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new Solana.Unity.Programs.Models.AccountResultWrapper<Colosseum>(res);
+            var resultingAccount = Colosseum.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new Solana.Unity.Programs.Models.AccountResultWrapper<Colosseum>(res, resultingAccount);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<Graveyard>> GetGraveyardAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new Solana.Unity.Programs.Models.AccountResultWrapper<Graveyard>(res);
+            var resultingAccount = Graveyard.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new Solana.Unity.Programs.Models.AccountResultWrapper<Graveyard>(res, resultingAccount);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<Profile>> GetProfileAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new Solana.Unity.Programs.Models.AccountResultWrapper<Profile>(res);
+            var resultingAccount = Profile.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new Solana.Unity.Programs.Models.AccountResultWrapper<Profile>(res, resultingAccount);
         }
 
         public async Task<SubscriptionState> SubscribeBrawlAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, Brawl> callback, Commitment commitment = Commitment.Finalized)
@@ -360,9 +549,63 @@ namespace Deathbattle
             return res;
         }
 
+        public async Task<SubscriptionState> SubscribeColosseumAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, Colosseum> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                Colosseum parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = Colosseum.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public async Task<SubscriptionState> SubscribeGraveyardAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, Graveyard> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                Graveyard parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = Graveyard.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public async Task<SubscriptionState> SubscribeProfileAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, Profile> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                Profile parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = Profile.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public async Task<RequestResult<string>> SendCreateProfileAsync(CreateProfileAccounts accounts, CreateProfileArgs args, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateProfile(accounts, args, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
         public async Task<RequestResult<string>> SendCreateCloneLabAsync(CreateCloneLabAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
         {
             Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateCloneLab(accounts, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
+        public async Task<RequestResult<string>> SendCreateColosseumAsync(CreateColosseumAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateColosseum(accounts, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
+        public async Task<RequestResult<string>> SendCreateGraveyardAsync(CreateGraveyardAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.CreateGraveyard(accounts, programId);
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
@@ -392,15 +635,42 @@ namespace Deathbattle
 
         protected override Dictionary<uint, ProgramError<DeathbattleErrorKind>> BuildErrorsDictionary()
         {
-            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlerNameTooLong, "Brawler name too long.")}, };
+            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NameTooLong, "Name too long.")}, {6004U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawl, "Invalid Brawl.")}, };
         }
     }
 
     namespace Program
     {
+        public class CreateProfileAccounts
+        {
+            public PublicKey Profile { get; set; }
+
+            public PublicKey Payer { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
+        }
+
         public class CreateCloneLabAccounts
         {
             public PublicKey CloneLab { get; set; }
+
+            public PublicKey Payer { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
+        }
+
+        public class CreateColosseumAccounts
+        {
+            public PublicKey Colosseum { get; set; }
+
+            public PublicKey Payer { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
+        }
+
+        public class CreateGraveyardAccounts
+        {
+            public PublicKey Graveyard { get; set; }
 
             public PublicKey Payer { get; set; }
 
@@ -431,6 +701,8 @@ namespace Deathbattle
         {
             public PublicKey CloneLab { get; set; }
 
+            public PublicKey Colosseum { get; set; }
+
             public PublicKey Brawl { get; set; }
 
             public PublicKey Brawler { get; set; }
@@ -449,6 +721,20 @@ namespace Deathbattle
 
         public static class DeathbattleProgram
         {
+            public static Solana.Unity.Rpc.Models.TransactionInstruction CreateProfile(CreateProfileAccounts accounts, CreateProfileArgs args, PublicKey programId)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Profile, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(15866949021771419105UL, offset);
+                offset += 8;
+                offset += args.Serialize(_data, offset);
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
             public static Solana.Unity.Rpc.Models.TransactionInstruction CreateCloneLab(CreateCloneLabAccounts accounts, PublicKey programId)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
@@ -456,6 +742,32 @@ namespace Deathbattle
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(1848630009599871168UL, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction CreateColosseum(CreateColosseumAccounts accounts, PublicKey programId)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Colosseum, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(16936109742051122458UL, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction CreateGraveyard(CreateGraveyardAccounts accounts, PublicKey programId)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Graveyard, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(17170173318506891256UL, offset);
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
@@ -492,7 +804,7 @@ namespace Deathbattle
             public static Solana.Unity.Rpc.Models.TransactionInstruction JoinBrawl(JoinBrawlAccounts accounts, JoinBrawlArgs args, PublicKey programId)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Colosseum, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(2932231159124621166UL, offset);
