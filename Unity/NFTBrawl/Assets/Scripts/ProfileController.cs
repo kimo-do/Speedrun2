@@ -27,7 +27,7 @@ public class ProfileController : MonoBehaviour
         yourBrawlers.gameObject.SetActive(false);
     }
 
-    private void OnBrawlersUpdated(Brawler brawler)
+    private void OnBrawlersUpdated(BrawlerData brawler)
     {
         if (GameScreen.instance.MyBrawlers.Count > 0)
         {
@@ -36,7 +36,7 @@ public class ProfileController : MonoBehaviour
                 Destroy(brawlerShown);
             }
 
-            foreach (Brawler myBrawler in GameScreen.instance.MyBrawlers)
+            foreach (BrawlerData myBrawler in GameScreen.instance.MyBrawlers)
             {
                 GameObject newBrawler = Instantiate(GameScreen.instance.brawlerPfb, brawlerContainer);
                 gameObjects.Add(newBrawler);
@@ -98,13 +98,5 @@ public class ProfileController : MonoBehaviour
         }
     }
 
-    public class Brawler
-    {
-        public CharacterType characterType;
 
-        public enum CharacterType
-        {
-            Default = 0,
-        }
-    }
 }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2987712503690451206}
   - component: {fileID: 5984632728971049445}
   - component: {fileID: 5474007216957835934}
+  - component: {fileID: 2541364813351913012}
   m_Layer: 0
   m_Name: Brawler
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3639, y: 0.3639, z: 0.3639}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -74,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -839530208, guid: f2c51cbe5b16a7a4e8b37754435ee8a2, type: 3}
+  m_Sprite: {fileID: -628980928, guid: 601c32b27a5fd8349a6bcf083942da5e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -106,3 +107,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2541364813351913012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3393109326361945595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea71d93ba8bbfce4c90d50d841d5d61a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualBrawlers:
+  - characterType: 0
+    controller: {fileID: 9100000, guid: 5c0b9e27f3a419b41b77ca8f316eb5f0, type: 2}
+  - characterType: 1
+    controller: {fileID: 22100000, guid: 471a6d6a387808d4e98cd5cf990bb024, type: 2}
+  - characterType: 2
+    controller: {fileID: 22100000, guid: 993c3249e92bd3e4f83b85a708e2803c, type: 2}

@@ -1,4 +1,5 @@
 using System;
+using Deathbattle.Accounts;
 using Lumberjack.Accounts;
 using Solana.Unity.SDK;
 using Solana.Unity.Wallet.Bip39;
@@ -47,6 +48,12 @@ public class LoginScreen : MonoBehaviour
         BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
         BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+
+    }
+
+    private void OnProfileChanged(Profile profile)
+    {
+        OnInitialDataLoaded();
     }
 
     private void OnInitialDataLoaded()
@@ -54,6 +61,8 @@ public class LoginScreen : MonoBehaviour
         if (Web3.Account != null)
         {
             var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+            Debug.Log($"Anchorservice was {isInitialized} initialized at this time.");
 
             if (isInitialized)
             {
