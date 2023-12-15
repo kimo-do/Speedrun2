@@ -56,9 +56,13 @@ public class BrawlAnchorService : MonoBehaviour
     public string LastError { get; set; }
 
     private SessionWallet sessionWallet;
+    private PublicKey AdminPubkey = new("braw1mRTFfPNedZHiDMWsZgB2pwS3bss91QUB6oy4FX");
     private PublicKey PlayerDataPDA;
     private PublicKey GameDataPDA;
     private PublicKey ProfilePDA;
+    private PublicKey CloneLabPDA;
+    private PublicKey ColosseumPDA;
+    private PublicKey GraveyardPDA;
     private bool _isInitialized;
     private DeathbattleClient anchorClient;
     private int blockingTransactionsInProgress;
@@ -124,6 +128,18 @@ public class BrawlAnchorService : MonoBehaviour
         PublicKey.TryFindProgramAddress(new[]
                 {Encoding.UTF8.GetBytes("profile"), account.PublicKey.KeyBytes},
             AnchorProgramIdPubKey, out ProfilePDA, out byte profileBump);
+
+        PublicKey.TryFindProgramAddress(new[]
+                {Encoding.UTF8.GetBytes("clone_lab"), AdminPubkey},
+            AnchorProgramIdPubKey, out CloneLabPDA, out byte cloneLabBump);
+
+        PublicKey.TryFindProgramAddress(new[]
+                {Encoding.UTF8.GetBytes("colosseum"), AdminPubkey},
+            AnchorProgramIdPubKey, out ColosseumPDA, out byte colosseumBump);
+
+        PublicKey.TryFindProgramAddress(new[]
+                {Encoding.UTF8.GetBytes("graveyard"), AdminPubkey},
+            AnchorProgramIdPubKey, out GraveyardPDA, out byte graveyardBump);
     }
 
     private static async Task RequestAirdropIfSolValueIsLow()
