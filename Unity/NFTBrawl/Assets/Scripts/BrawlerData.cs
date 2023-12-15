@@ -13,6 +13,7 @@ public class BrawlerData
         Default = 0,
         Male1 = 1,
         Female1 = 2,
+        Bonki = 3,
     }
 
     public enum BrawlerType
@@ -20,5 +21,8 @@ public class BrawlerData
         Saber = 0,
         Pistol = 1,
         Hack = 2,
+        Katana = 3,
+        Virus = 4,
+        Laser = 5,
     }
 }

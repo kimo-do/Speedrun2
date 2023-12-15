@@ -4,7 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BrawlController : MonoBehaviour
+public class BrawlController : Window
 {
     public GameObject brawlerLeft;
     public GameObject brawlerRight;
@@ -19,6 +19,7 @@ public class BrawlController : MonoBehaviour
     public Transform rightMeleeAttack;
 
     public List<GameObject> crowd;
+    public GameObject brawlContainer;
 
     [Header("Settings")]
     public float moveInSpeed = 1f;
@@ -40,6 +41,18 @@ public class BrawlController : MonoBehaviour
     private BrawlerData firstBrawler;
     private BrawlerData secondBrawler;
     private List<BrawlerData> crowdDataList;
+
+    public override void Awake()
+    {
+        base.Awake();
+    }
+
+    public override void Toggle(bool toggle)
+    {
+        base.Toggle(toggle);
+
+        brawlContainer.SetActive(toggle);
+    }
 
     // Start is called before the first frame update
     void Start()

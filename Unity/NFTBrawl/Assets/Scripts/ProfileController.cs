@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [ExecuteInEditMode]
-public class ProfileController : MonoBehaviour
+public class ProfileController : Window
 {
     public RectTransform noBrawlers;
     public GameObject yourBrawlers;
@@ -17,14 +18,47 @@ public class ProfileController : MonoBehaviour
     public int maxItems = 9;
     public bool refresh;
     public Transform brawlerContainer;
+    public Button labButton1;
+    public Button labButton2;
+
+
+    public override void Awake()
+    {
+        base.Awake();
+    }
+
+    public override void Toggle(bool toggle)
+    {
+        base.Toggle(toggle);
+
+        if (toggle)
+        {
+            if (gameObjects.Count > 0)
+            {
+                yourBrawlers.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            yourBrawlers.gameObject.SetActive(false);
+        }
+    }
 
     void Start()
     {
         GameScreen.instance.BrawlerRetrieved += OnBrawlersUpdated;
 
+        labButton1.onClick.AddListener(ClickedOpenLab);
+        labButton2.onClick.AddListener(ClickedOpenLab);
+
         //PositionGameObjects();
         noBrawlers.gameObject.SetActive(true);
         yourBrawlers.gameObject.SetActive(false);
+    }
+
+    private void ClickedOpenLab()
+    {
+        GameScreen.instance.OpenLab();
     }
 
     private void OnBrawlersUpdated(BrawlerData brawler)

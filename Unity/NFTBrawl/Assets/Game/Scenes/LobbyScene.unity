@@ -6182,7 +6182,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2208233826264859300, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2322843787518288457, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
       propertyPath: m_Pivot.x
@@ -6294,6 +6294,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2322843787518288457, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
   m_PrefabInstance: {fileID: 171677828}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &171677830 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2208233826264859300, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
+  m_PrefabInstance: {fileID: 171677828}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &172765148
 GameObject:
   m_ObjectHideFlags: 0
@@ -6522,7 +6533,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &182535617
 Transform:
   m_ObjectHideFlags: 0
@@ -11757,7 +11768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 946525032748819595, guid: 9983340f07aa240e7adad9f74350fcf4, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 52.54
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 946525032748819595, guid: 9983340f07aa240e7adad9f74350fcf4, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -12257,7 +12268,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 85.155, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 46.44}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &360344788
@@ -14289,8 +14300,8 @@ RectTransform:
   - {fileID: 895286102}
   - {fileID: 1648474101}
   - {fileID: 1536110268}
-  - {fileID: 167198474}
   - {fileID: 1061213648}
+  - {fileID: 167198474}
   - {fileID: 1390396148}
   - {fileID: 1242640857}
   - {fileID: 1215065034387861979}
@@ -14316,6 +14327,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graveyardScreen: {fileID: 167198475}
   profileScreen: {fileID: 1061213650}
+  brawlScreen: {fileID: 1390396151}
   ChuckWoodSessionButton: {fileID: 455991734}
   NftsButton: {fileID: 1207030472}
   InitGameDataButton: {fileID: 491985597}
@@ -15461,7 +15473,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2208233826264859300, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
       propertyPath: m_Interactable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2322843787518288457, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
       propertyPath: m_Pivot.x
@@ -15573,6 +15585,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2322843787518288457, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
   m_PrefabInstance: {fileID: 871575761}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &871575763 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2208233826264859300, guid: 7e03cc3689a4b614ea3b2326e55cbc21, type: 3}
+  m_PrefabInstance: {fileID: 871575761}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &895286101
 GameObject:
   m_ObjectHideFlags: 0
@@ -16027,6 +16050,8 @@ MonoBehaviour:
   maxItems: 9
   refresh: 0
   brawlerContainer: {fileID: 1163154084}
+  labButton1: {fileID: 871575763}
+  labButton2: {fileID: 171677830}
 --- !u!1 &1076814521
 GameObject:
   m_ObjectHideFlags: 0
@@ -22440,7 +22465,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1390396147}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -22471,6 +22496,7 @@ MonoBehaviour:
   - {fileID: 140027079}
   - {fileID: 918745526}
   - {fileID: 355029428}
+  brawlContainer: {fileID: 182535616}
   moveInSpeed: 0.2
   moveAttackSpeed: 0.12
   attackDuration: 0.5
@@ -22723,7 +22749,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 69.67, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 46.44}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1492462565
@@ -22900,6 +22926,10 @@ PrefabInstance:
     - target: {fileID: 3393109326361945595, guid: b74b09a4fd9304b4e91301b2f369045e, type: 3}
       propertyPath: m_Name
       value: Placeholder thing
+      objectReference: {fileID: 0}
+    - target: {fileID: 3393109326361945595, guid: b74b09a4fd9304b4e91301b2f369045e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5474007216957835934, guid: b74b09a4fd9304b4e91301b2f369045e, type: 3}
       propertyPath: m_Controller
@@ -24737,7 +24767,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'You have no brawler :(
+  m_text: 'You have no brawlers :(
 
 
 
@@ -27247,7 +27277,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7768150992304558030, guid: 932385457eb6e48999e46c08f0039d6c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 257.18
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7768150992304558030, guid: 932385457eb6e48999e46c08f0039d6c, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -27311,7 +27341,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8172624838168562768, guid: 932385457eb6e48999e46c08f0039d6c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 64.45
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8172624838168562768, guid: 932385457eb6e48999e46c08f0039d6c, type: 3}
       propertyPath: m_AnchoredPosition.y

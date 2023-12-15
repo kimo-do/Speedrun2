@@ -28,6 +28,11 @@ public class BrawlerCharacter : MonoBehaviour
         animator.runtimeAnimatorController = myVisualBrawler.controller;
     }
 
+    public void SetDeath(bool death)
+    {
+        animator.SetBool("death", death);
+    }
+
     public void DoAttack()
     {
         switch (myBrawlerData.brawlerType)
@@ -40,6 +45,15 @@ public class BrawlerCharacter : MonoBehaviour
                 break;
             case BrawlerData.BrawlerType.Pistol:
                 abilityAnimator.SetTrigger("pistol");
+                break;
+            case BrawlerData.BrawlerType.Katana:
+                abilityAnimator.SetTrigger("katana");
+                break;
+            case BrawlerData.BrawlerType.Laser:
+                abilityAnimator.SetTrigger("laser");
+                break;
+            case BrawlerData.BrawlerType.Virus:
+                abilityAnimator.SetTrigger("virus");
                 break;
         }
     }

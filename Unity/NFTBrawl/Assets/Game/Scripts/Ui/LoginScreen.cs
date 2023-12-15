@@ -48,6 +48,7 @@ public class LoginScreen : MonoBehaviour
         BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
         BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+        BrawlAnchorService.OnProfileChanged += OnProfileChanged;
 
     }
 
@@ -61,8 +62,9 @@ public class LoginScreen : MonoBehaviour
         if (Web3.Account != null)
         {
             var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+            string isInit = isInitialized ? "was" : "not";
 
-            Debug.Log($"Anchorservice was {isInitialized} initialized at this time.");
+            Debug.Log($"BrawlAnchorservice {isInit} initialized at this time.");
 
             if (isInitialized)
             {

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
-public class GraveyardController : MonoBehaviour
+public class GraveyardController : Window
 {
     public static GraveyardController Instance;
 
@@ -22,13 +22,12 @@ public class GraveyardController : MonoBehaviour
     public ParticleSystem idlePS;
     public ParticleSystem boomPS;
 
-    private CanvasGroup canvasGroup;
     private Coroutine glowLight;
 
-    private void Awake()
+    public override void Awake()
     {
         Instance = this;
-        canvasGroup = GetComponent<CanvasGroup>();
+        base.Awake();
     }
 
     void Start()
@@ -53,24 +52,20 @@ public class GraveyardController : MonoBehaviour
         }
     }
 
-    public void Toggle(bool toggle)
+    public override void Toggle(bool toggle)
     {
+        base.Toggle(toggle);
+
         if (toggle)
         {
             cloneVFX.SetActive(true);
             fallenBrawlersCountText.gameObject.SetActive(true);
-            canvasGroup.alpha = 1f;
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
             IdleGlowEffect();
         }
         else
         {
             cloneVFX.SetActive(false);
             fallenBrawlersCountText.gameObject.SetActive(false);
-            canvasGroup.alpha = 0f;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
         }
     }
 

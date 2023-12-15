@@ -38,6 +38,7 @@ public class BrawlAnchorService : MonoBehaviour
     public static BrawlAnchorService Instance { get; private set; }
     public static Action<PlayerData> OnPlayerDataChanged;
     public static Action<CloneLab> OnCloneLabChanged;
+    public static Action<Graveyard> OnGraveyardChanged;
     public static Action<Profile> OnProfileChanged;
     public static Action OnInitialDataLoaded;
 
@@ -46,6 +47,8 @@ public class BrawlAnchorService : MonoBehaviour
     public PlayerData CurrentPlayerData { get; private set; }
     public CloneLab CurrentCloneLab { get; private set; }
     public Profile CurrentProfile { get; private set; }
+    public Graveyard CurrentGraveyard { get; private set; }
+
 
     public int BlockingTransactionsInProgress => blockingTransactionsInProgress;
     public int NonBlockingTransactionsInProgress => nonBlockingTransactionsInProgress;
@@ -103,6 +106,7 @@ public class BrawlAnchorService : MonoBehaviour
 
         //await SubscribeToPlayerDataUpdates();
         await SubscribeToCloneLabUpdates();
+        await SubscribeToProfileUpdates();
 
         OnInitialDataLoaded?.Invoke();
     }
@@ -185,15 +189,15 @@ public class BrawlAnchorService : MonoBehaviour
 
     private async Task SubscribeToCloneLabUpdates()
     {
-        AccountResultWrapper<CloneLab> gameData = null;
+        AccountResultWrapper<CloneLab> cloneData = null;
 
         try
         {
-            gameData = await anchorClient.GetCloneLabAsync(GameDataPDA, Commitment.Confirmed);
-            if (gameData.ParsedResult != null)
+            cloneData = await anchorClient.GetCloneLabAsync(GameDataPDA, Commitment.Confirmed);
+            if (cloneData.ParsedResult != null)
             {
-                CurrentCloneLab = gameData.ParsedResult;
-                OnCloneLabChanged?.Invoke(gameData.ParsedResult);
+                CurrentCloneLab = cloneData.ParsedResult;
+                OnCloneLabChanged?.Invoke(cloneData.ParsedResult);
             }
         }
         catch (Exception e)
@@ -201,7 +205,7 @@ public class BrawlAnchorService : MonoBehaviour
             Debug.Log("Probably game data not available " + e.Message);
         }
 
-        if (gameData != null)
+        if (cloneData != null)
         {
             await anchorClient.SubscribeCloneLabAsync(GameDataPDA, (state, value, gameData) =>
             {
@@ -219,25 +223,26 @@ public class BrawlAnchorService : MonoBehaviour
 
     private async Task SubscribeToProfileUpdates()
     {
-        AccountResultWrapper<Profile> gameData = null;
+        AccountResultWrapper<Profile> profileData = null;
 
         try
         {
-            gameData = await anchorClient.GetProfileAsync(GameDataPDA, Commitment.Confirmed);
-            if (gameData.ParsedResult != null)
+            profileData = await anchorClient.GetProfileAsync(ProfilePDA, Commitment.Confirmed);
+            if (profileData.ParsedResult != null)
             {
-                CurrentProfile = gameData.ParsedResult;
-                OnProfileChanged?.Invoke(gameData.ParsedResult);
+                CurrentProfile = profileData.ParsedResult;
+                OnProfileChanged?.Invoke(profileData.ParsedResult);
+                _isInitialized = true;
             }
         }
         catch (Exception e)
         {
-            Debug.Log("Probably game data not available " + e.Message);
+            Debug.Log("Probably profile not available: " + e.Message);
         }
 
-        if (gameData != null)
+        if (profileData != null)
         {
-            await anchorClient.SubscribeProfileAsync(GameDataPDA, (state, value, gameData) =>
+            await anchorClient.SubscribeProfileAsync(ProfilePDA, (state, value, gameData) =>
             {
                 OnReceivedProfileUpdate(gameData);
             }, Commitment.Processed);
@@ -249,6 +254,40 @@ public class BrawlAnchorService : MonoBehaviour
         Debug.Log($"Socket Message: Profile username: {profile.Username}.");
         CurrentProfile = profile;
         OnProfileChanged?.Invoke(profile);
+    }
+
+    private async Task SubscribeToGraveyardUpdates()
+    {
+        AccountResultWrapper<Graveyard> graveyardData = null;
+
+        try
+        {
+            graveyardData = await anchorClient.GetGraveyardAsync(ProfilePDA, Commitment.Confirmed);
+            if (graveyardData.ParsedResult != null)
+            {
+                CurrentGraveyard = graveyardData.ParsedResult;
+                OnGraveyardChanged?.Invoke(graveyardData.ParsedResult);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Probably profile not available: " + e.Message);
+        }
+
+        if (graveyardData != null)
+        {
+            await anchorClient.SubscribeGraveyardAsync(ProfilePDA, (state, value, gameData) =>
+            {
+                OnReceivedGraveyardUpdate(gameData);
+            }, Commitment.Processed);
+        }
+    }
+
+    private void OnReceivedGraveyardUpdate(Graveyard graveyard)
+    {
+        Debug.Log($"Socket Message: Graveyard fallen brawlers: {graveyard.Brawlers.Length}.");
+        CurrentGraveyard = graveyard;
+        OnGraveyardChanged?.Invoke(graveyard);
     }
 
     public async Task InitAccounts(bool useSession, string username)

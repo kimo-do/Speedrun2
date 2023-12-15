@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: bonki
+  m_Controller: {fileID: 9100000, guid: 5c0b9e27f3a419b41b77ca8f316eb5f0, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 5172eb9006ac1de468e5fd4a08b5a872, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 9a028408805e82744aaec187eff276fa, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: ab7698e6fb9b6c241ba3c76bc1e0ae81, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: b3937bebf4d9dfa44baa693825322bef, type: 2}

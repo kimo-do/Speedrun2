@@ -24,6 +24,7 @@ public class GameScreen : MonoBehaviour
     [Header("Screens")]
     public GraveyardController graveyardScreen;
     public ProfileController profileScreen;
+    public BrawlController brawlScreen;
 
     [Header("Misc")]
     public Button ChuckWoodSessionButton;
@@ -64,10 +65,13 @@ public class GameScreen : MonoBehaviour
 
     void Start()
     {
-        ChuckWoodSessionButton.onClick.AddListener(OnChuckWoodSessionButtonClicked);
-        NftsButton.onClick.AddListener(OnNftsButtonClicked);
-        InitGameDataButton.onClick.AddListener(OnInitGameDataButtonClicked);
-        CharacterStartPosition = ChuckWoodSessionButton.transform.localPosition;
+        DisableAllScreens();
+
+        profileScreen.Toggle(true);
+        //ChuckWoodSessionButton.onClick.AddListener(OnChuckWoodSessionButtonClicked);
+        //NftsButton.onClick.AddListener(OnNftsButtonClicked);
+        //InitGameDataButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        //CharacterStartPosition = ChuckWoodSessionButton.transform.localPosition;
         // In case we are not logged in yet load the LoginScene
         if (Web3.Account == null)
         {
@@ -77,15 +81,28 @@ public class GameScreen : MonoBehaviour
         //StartCoroutine(UpdateNextEnergy());
         
         //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        //BrawlAnchorService.OnCloneLabChanged += OnGameDataChanged;
         //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
+        BrawlAnchorService.OnCloneLabChanged += OnGameDataChanged;
+    }
+
+    public void OpenLab()
+    {
+        DisableAllScreens();
+        graveyardScreen.Toggle(true);
+    }
+
+    private void DisableAllScreens()
+    {
+        profileScreen.Toggle(false);
+        graveyardScreen.Toggle(false);
+        brawlScreen.Toggle(false);
     }
 
     private void OnDestroy()
     {
-        BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
+        //BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
+        //BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
         BrawlAnchorService.OnCloneLabChanged -= OnGameDataChanged;
-        BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
     }
 
     private void OnEnable()
