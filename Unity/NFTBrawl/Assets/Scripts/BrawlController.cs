@@ -56,12 +56,14 @@ public class BrawlController : MonoBehaviour
             {
                 username = "X",
                 characterType = BrawlerData.CharacterType.Female1,
+                brawlerType = BrawlerData.BrawlerType.Hack,
             };
 
             secondBrawler = new BrawlerData()
             {
                 username = "DaveR",
                 characterType = BrawlerData.CharacterType.Male1,
+                brawlerType = BrawlerData.BrawlerType.Saber,
             };
 
             InitFightSequence(firstBrawler, secondBrawler);
@@ -69,12 +71,12 @@ public class BrawlController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.H))
         {
-            ShowBattleResult(false);
+            DoAttack(true);
         }
 
         if (Input.GetKeyUp(KeyCode.J))
         {
-            ShowBattleResult(true);
+            DoAttack(false);
         }
 
         if (Input.GetKeyUp(KeyCode.K))
@@ -153,7 +155,7 @@ public class BrawlController : MonoBehaviour
         rightPlayerRoutine = StartCoroutine(MoveIntoBattleVisuals(0.3f, false));
     }
 
-    public void DoMeleeAttack(bool forLeftPlayer)
+    public void DoAttack(bool forLeftPlayer)
     {
         if (forLeftPlayer)
         {
@@ -233,31 +235,48 @@ public class BrawlController : MonoBehaviour
     IEnumerator DoMeleeAttackVisuals(bool isLeftPlayer)
     {
         float elapsedTime = 0;
+        bool shouldMove = false;
 
         Transform brawler = isLeftPlayer ? brawlerLeft.transform : brawlerRight.transform;
+
+        BrawlerCharacter brawlerCharacter = brawler.GetComponent<BrawlerCharacter>();
+
+        if (brawlerCharacter.MyBrawlerData.brawlerType == BrawlerData.BrawlerType.Saber)
+        {
+            shouldMove = true;
+        }
+
         Vector3 start = isLeftPlayer ? leftBattle.position : rightBattle.position;
         Vector3 end = isLeftPlayer ? leftMeleeAttack.position : rightMeleeAttack.position;
 
-        while (elapsedTime < moveInSpeed)
+        if (shouldMove)
         {
-            brawler.position = Vector3.Lerp(start, end, (elapsedTime / moveAttackSpeed));
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            while (elapsedTime < moveInSpeed)
+            {
+                brawler.position = Vector3.Lerp(start, end, (elapsedTime / moveAttackSpeed));
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            brawler.position = end;
         }
 
-        brawler.position = end;
+        brawlerCharacter.DoAttack();
 
         yield return new WaitForSeconds(attackDuration);
 
         elapsedTime = 0;
 
-        while (elapsedTime < moveInSpeed)
+        if (shouldMove)
         {
-            brawler.position = Vector3.Lerp(end, start, (elapsedTime / moveAttackSpeed));
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
+            while (elapsedTime < moveInSpeed)
+            {
+                brawler.position = Vector3.Lerp(end, start, (elapsedTime / moveAttackSpeed));
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
 
-        brawler.position = start;
+            brawler.position = start;
+        }
     }
 }

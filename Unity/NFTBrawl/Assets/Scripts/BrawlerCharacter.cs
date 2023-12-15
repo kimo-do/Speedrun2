@@ -7,6 +7,7 @@ using UnityEngine;
 public class BrawlerCharacter : MonoBehaviour
 {
     public List<VisualBrawlerData> visualBrawlers;
+    public Animator abilityAnimator;
 
     private VisualBrawlerData myVisualBrawler;
     private Animator animator;
@@ -17,7 +18,6 @@ public class BrawlerCharacter : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
-
         animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
     }
 
@@ -26,6 +26,22 @@ public class BrawlerCharacter : MonoBehaviour
         myBrawlerData = brawlerData;
         myVisualBrawler = visualBrawlers.FirstOrDefault(b => b.characterType == brawlerData.characterType);
         animator.runtimeAnimatorController = myVisualBrawler.controller;
+    }
+
+    public void DoAttack()
+    {
+        switch (myBrawlerData.brawlerType)
+        {
+            case BrawlerData.BrawlerType.Hack:
+                abilityAnimator.SetTrigger("hack");
+                break;
+            case BrawlerData.BrawlerType.Saber:
+                abilityAnimator.SetTrigger("saber");
+                break;
+            case BrawlerData.BrawlerType.Pistol:
+                abilityAnimator.SetTrigger("pistol");
+                break;
+        }
     }
 
     [Serializable]

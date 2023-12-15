@@ -5,6 +5,7 @@ using UnityEngine;
 public class BrawlerData
 {
     public CharacterType characterType;
+    public BrawlerType brawlerType;
     public string username;
 
     public enum CharacterType
@@ -12,5 +13,12 @@ public class BrawlerData
         Default = 0,
         Male1 = 1,
         Female1 = 2,
+    }
+
+    public enum BrawlerType
+    {
+        Saber = 0,
+        Pistol = 1,
+        Hack = 2,
     }
 }
