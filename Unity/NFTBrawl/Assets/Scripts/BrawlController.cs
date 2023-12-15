@@ -67,16 +67,16 @@ public class BrawlController : Window
         {
             firstBrawler = new BrawlerData()
             {
-                username = "X",
+                username = "Longnameguy",
                 characterType = BrawlerData.CharacterType.Female1,
-                brawlerType = BrawlerData.BrawlerType.Hack,
+                brawlerType = BrawlerData.BrawlerType.Pistol,
             };
 
             secondBrawler = new BrawlerData()
             {
                 username = "DaveR",
-                characterType = BrawlerData.CharacterType.Male1,
-                brawlerType = BrawlerData.BrawlerType.Saber,
+                characterType = BrawlerData.CharacterType.Bonki,
+                brawlerType = BrawlerData.BrawlerType.Katana,
             };
 
             InitFightSequence(firstBrawler, secondBrawler);
@@ -94,7 +94,12 @@ public class BrawlController : Window
 
         if (Input.GetKeyUp(KeyCode.K))
         {
-            HideBattleResult();
+            brawlerRight.GetComponent<BrawlerCharacter>().SetDeath(true);
+        }
+
+        if (Input.GetKeyUp(KeyCode.L))
+        {
+            ShowBattleResult(false);
         }
     }
 
@@ -254,7 +259,7 @@ public class BrawlController : Window
 
         BrawlerCharacter brawlerCharacter = brawler.GetComponent<BrawlerCharacter>();
 
-        if (brawlerCharacter.MyBrawlerData.brawlerType == BrawlerData.BrawlerType.Saber)
+        if (brawlerCharacter.MyBrawlerData.brawlerType == BrawlerData.BrawlerType.Saber || brawlerCharacter.MyBrawlerData.brawlerType == BrawlerData.BrawlerType.Katana)
         {
             shouldMove = true;
         }

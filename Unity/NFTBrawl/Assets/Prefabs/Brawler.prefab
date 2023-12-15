@@ -122,13 +122,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visualBrawlers:
   - characterType: 0
-    controller: {fileID: 9100000, guid: 5c0b9e27f3a419b41b77ca8f316eb5f0, type: 2}
+    controller: {fileID: 0}
+    customIdleSpeed: 1
   - characterType: 1
     controller: {fileID: 22100000, guid: 471a6d6a387808d4e98cd5cf990bb024, type: 2}
+    customIdleSpeed: 1
   - characterType: 2
     controller: {fileID: 22100000, guid: 993c3249e92bd3e4f83b85a708e2803c, type: 2}
+    customIdleSpeed: 1
   - characterType: 3
     controller: {fileID: 22100000, guid: 4f5d280aa6df9f94480cf3db1516880f, type: 2}
+    customIdleSpeed: 5
   abilityAnimator: {fileID: 5618935853441750409}
 --- !u!1 &6898899360993754351
 GameObject:

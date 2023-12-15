@@ -21,11 +21,23 @@ public class BrawlerCharacter : MonoBehaviour
         animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
     }
 
+    private void OnEnable()
+    {
+        animator = GetComponent<Animator>();
+        animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
+    }
+
     public void SetBrawlerData(BrawlerData brawlerData)
     {
         myBrawlerData = brawlerData;
         myVisualBrawler = visualBrawlers.FirstOrDefault(b => b.characterType == brawlerData.characterType);
-        animator.runtimeAnimatorController = myVisualBrawler.controller;
+
+        if (myVisualBrawler.controller != null)
+        {
+            animator.runtimeAnimatorController = myVisualBrawler.controller;
+        }
+
+        animator.SetFloat("idlespeed", myVisualBrawler.customIdleSpeed);
     }
 
     public void SetDeath(bool death)
@@ -62,6 +74,7 @@ public class BrawlerCharacter : MonoBehaviour
     public class VisualBrawlerData
     {
         public BrawlerData.CharacterType characterType;
-        public RuntimeAnimatorController controller;
+        public AnimatorOverrideController controller;
+        public float customIdleSpeed = 1f;
     }
 }
