@@ -51,11 +51,11 @@ public class GameScreen : MonoBehaviour
     private CloneLab currentCloneLab;
 
     public Action<int> FalledBrawlersUpdated;
-    public Action<ProfileController.Brawler> BrawlerRetrieved;
+    public Action<BrawlerData> BrawlerRetrieved;
 
-    private List<ProfileController.Brawler> myBrawlers = new();
+    private List<BrawlerData> myBrawlers = new();
 
-    public List<ProfileController.Brawler> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
+    public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
 
     private void Awake()
     {
