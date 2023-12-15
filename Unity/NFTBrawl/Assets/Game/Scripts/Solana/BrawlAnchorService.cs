@@ -38,12 +38,14 @@ public class BrawlAnchorService : MonoBehaviour
     public static BrawlAnchorService Instance { get; private set; }
     public static Action<PlayerData> OnPlayerDataChanged;
     public static Action<CloneLab> OnCloneLabChanged;
+    public static Action<Profile> OnProfileChanged;
     public static Action OnInitialDataLoaded;
 
     public bool IsAnyBlockingTransactionInProgress => blockingTransactionsInProgress > 0;
     public bool IsAnyNonBlockingTransactionInProgress => nonBlockingTransactionsInProgress > 0;
     public PlayerData CurrentPlayerData { get; private set; }
     public CloneLab CurrentCloneLab { get; private set; }
+    public Profile CurrentProfile { get; private set; }
 
     public int BlockingTransactionsInProgress => blockingTransactionsInProgress;
     public int NonBlockingTransactionsInProgress => nonBlockingTransactionsInProgress;
@@ -215,6 +217,40 @@ public class BrawlAnchorService : MonoBehaviour
         OnCloneLabChanged?.Invoke(cloneLab);
     }
 
+    private async Task SubscribeToProfileUpdates()
+    {
+        AccountResultWrapper<Profile> gameData = null;
+
+        try
+        {
+            gameData = await anchorClient.GetProfileAsync(GameDataPDA, Commitment.Confirmed);
+            if (gameData.ParsedResult != null)
+            {
+                CurrentProfile = gameData.ParsedResult;
+                OnProfileChanged?.Invoke(gameData.ParsedResult);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Probably game data not available " + e.Message);
+        }
+
+        if (gameData != null)
+        {
+            await anchorClient.SubscribeProfileAsync(GameDataPDA, (state, value, gameData) =>
+            {
+                OnReceivedProfileUpdate(gameData);
+            }, Commitment.Processed);
+        }
+    }
+
+    private void OnReceivedProfileUpdate(Profile profile)
+    {
+        Debug.Log($"Socket Message: Profile username: {profile.Username}.");
+        CurrentProfile = profile;
+        OnProfileChanged?.Invoke(profile);
+    }
+
     public async Task InitAccounts(bool useSession, string username)
     {
         var tx = new Transaction()
@@ -230,13 +266,17 @@ public class BrawlAnchorService : MonoBehaviour
         // accounts.Signer = Web3.Account;
         // accounts.SystemProgram = SystemProgram.ProgramIdKey;
 
-        CreateProfileAccounts cpaAccounts = new CreateProfileAccounts();
-        cpaAccounts.Payer = Web3.Account;
-        cpaAccounts.SystemProgram = SystemProgram.ProgramIdKey;
-        cpaAccounts.Profile = ProfilePDA;
+        CreateProfileAccounts cpaAccounts = new CreateProfileAccounts
+        {
+            Payer = Web3.Account,
+            SystemProgram = SystemProgram.ProgramIdKey,
+            Profile = ProfilePDA
+        };
 
-        CreateProfileArgs cpaArgs = new CreateProfileArgs();
-        cpaArgs.Username = username;
+        CreateProfileArgs cpaArgs = new CreateProfileArgs
+        {
+            Username = username
+        };
 
         var initTx = DeathbattleProgram.CreateProfile(cpaAccounts, cpaArgs, AnchorProgramIdPubKey);
         tx.Add(initTx);
@@ -261,7 +301,7 @@ public class BrawlAnchorService : MonoBehaviour
 
         await UpdateSessionValid();
         //await SubscribeToPlayerDataUpdates();
-        await SubscribeToCloneLabUpdates();
+        await SubscribeToProfileUpdates();
     }
 
     private async Task<bool> SendAndConfirmTransaction(WalletBase wallet, Transaction transaction, string label = "",
