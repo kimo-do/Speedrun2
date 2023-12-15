@@ -5,8 +5,11 @@ using Solana.Unity.SDK;
 using Solana.Unity.Wallet.Bip39;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
 
 /// <summary>
 /// Handles the connection to the players wallet.
@@ -20,6 +23,9 @@ public class LoginScreen : MonoBehaviour
     public Button editorLoginButton;
     public Button loginWalletAdapterButton;
 
+    public Volume globalVolume;
+
+
     // Profile
     public Button initProfileButton;
     public Button profilePictureButton;
@@ -31,6 +37,9 @@ public class LoginScreen : MonoBehaviour
     private bool creatingProfile = false;
     private float loginTime;
 
+    private ChromaticAberration chromaticAberration;
+    private float pingPongDuration = 3f;
+
     void Start()
     {
         if (!Application.isEditor)
@@ -38,6 +47,8 @@ public class LoginScreen : MonoBehaviour
             editorLoginButton.gameObject.SetActive(false);
         }
 
+        globalVolume.profile.TryGet(out chromaticAberration);
+       
         connectWalletScreen.gameObject.SetActive(true);
         createProfileScreen.gameObject.SetActive(false);
 
@@ -50,6 +61,17 @@ public class LoginScreen : MonoBehaviour
         BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
         BrawlAnchorService.OnProfileChanged += OnProfileChanged;
 
+        StartCoroutine(ChromaticLoop());
+    }
+
+    IEnumerator ChromaticLoop()
+    {
+        while (true)
+        {
+            float pingPong = Mathf.PingPong(Time.time / pingPongDuration, 0.5f); // Oscillates between 0 and 0.2
+            chromaticAberration.intensity.value = 0.4f + pingPong; // Adjusts range to 0.4 to 0.6
+            yield return null; // Wait for the next frame
+        }
     }
 
     private void OnProfileChanged(Profile profile)

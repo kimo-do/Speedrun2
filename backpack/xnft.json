@@ -1,0 +1,21 @@
+{
+  "name": "Clash of Clones",
+  "version": "0.0.1",
+  "storage": "aws",
+  "description": "Clone brawl raffle game",
+  "website": "https://discord.gg/UfWARJfjTu",
+  "kind": "app",
+  "tag": "game",
+  "icon": {
+    "md": "./assets/icon.png"
+  },
+  "contact": "kimosabe.crypto@gmail.com",
+  "screenshots": [
+    "./assets/screenshot1.png"
+  ],
+  "entrypoints": {
+    "default": {
+      "web": "https://kimo-do.github.io/Speedrun2/"
+    }
+  }
+}
