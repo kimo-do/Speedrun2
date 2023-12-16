@@ -1,4 +1,7 @@
-use anchor_lang::{prelude::*, solana_program};
+use anchor_lang::{
+    prelude::*,
+    solana_program::{self, program::invoke, system_instruction},
+};
 use strum::IntoEnumIterator;
 
 use crate::{rand_choice, Brawler, BrawlerType, CharacterType, CloneLab, Profile};
@@ -67,6 +70,22 @@ impl<'info> CreateClone<'info> {
         ctx.accounts.brawler.brawler_type = rand_choice(
             &BrawlerType::iter().collect(),
             &ctx.accounts.slot_hashes.to_account_info(),
+        )?;
+
+        // Transfer 1 SOL fee to the Clone Lab.
+        let ix = system_instruction::transfer(
+            &ctx.accounts.payer.key(),
+            &ctx.accounts.clone_lab.key(),
+            1_000_000_000,
+        );
+
+        invoke(
+            &ix,
+            &[
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.clone_lab.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
         )?;
 
         Ok(())

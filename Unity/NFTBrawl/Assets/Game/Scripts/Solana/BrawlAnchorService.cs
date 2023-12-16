@@ -28,7 +28,7 @@ using Deathbattle.Types;
 
 public class BrawlAnchorService : MonoBehaviour
 {
-    public PublicKey AnchorProgramIdPubKey = new("BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ");
+    public static PublicKey AnchorProgramIdPubKey = new("BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ");
 
     // Needs to be the same constants as in the anchor program
     public const int TIME_TO_REFILL_ENERGY = 60;
@@ -59,14 +59,14 @@ public class BrawlAnchorService : MonoBehaviour
     public long LastTransactionTimeInMs => lastTransactionTimeInMs;
     public string LastError { get; set; }
 
-    private SessionWallet sessionWallet;
+    public SessionWallet sessionWallet;
     private PublicKey AdminPubkey = new("braw1mRTFfPNedZHiDMWsZgB2pwS3bss91QUB6oy4FX");
     private PublicKey PlayerDataPDA;
     private PublicKey GameDataPDA;
-    private PublicKey ProfilePDA;
-    private PublicKey CloneLabPDA;
-    private PublicKey ColosseumPDA;
-    private PublicKey GraveyardPDA;
+    public PublicKey ProfilePDA;
+    public PublicKey CloneLabPDA;
+    public PublicKey ColosseumPDA;
+    public PublicKey GraveyardPDA;
     private bool _isInitialized;
     private DeathbattleClient anchorClient;
     private int blockingTransactionsInProgress;
@@ -75,11 +75,11 @@ public class BrawlAnchorService : MonoBehaviour
     private string sessionKeyPassword = "inGame"; // Would be better to generate and save in playerprefs
     private string levelSeed = "level_2";
     private ushort transactionCounter = 0;
-    
+
     // Only used to show transaction speed. Feel free to remove
-    private Dictionary<ushort, Stopwatch> stopWatches = new ();
+    private Dictionary<ushort, Stopwatch> stopWatches = new();
     private long lastTransactionTimeInMs;
-    
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -103,9 +103,9 @@ public class BrawlAnchorService : MonoBehaviour
     {
         Debug.Log("Logged in with pubkey: " + account.PublicKey);
 
-        
+
         await RequestAirdropIfSolValueIsLow();
-        
+
         sessionWallet = await SessionWallet.GetSessionWallet(AnchorProgramIdPubKey, sessionKeyPassword);
         await UpdateSessionValid();
 
@@ -170,7 +170,7 @@ public class BrawlAnchorService : MonoBehaviour
         return _isInitialized;
     }
 
-    private long GetSessionKeysEndTime()
+    public long GetSessionKeysEndTime()
     {
         return DateTimeOffset.UtcNow.AddDays(6).ToUnixTimeSeconds();
     }
@@ -361,12 +361,6 @@ public class BrawlAnchorService : MonoBehaviour
             RecentBlockHash = await Web3.BlockHash()
         };
 
-        // InitPlayerAccounts accounts = new InitPlayerAccounts();
-        // accounts.Player = PlayerDataPDA;
-        // accounts.GameData = GameDataPDA;
-        // accounts.Signer = Web3.Account;
-        // accounts.SystemProgram = SystemProgram.ProgramIdKey;
-
         CreateProfileAccounts cpaAccounts = new CreateProfileAccounts
         {
             Payer = Web3.Account,
@@ -393,7 +387,7 @@ public class BrawlAnchorService : MonoBehaviour
                 cpaAccounts.Payer = Web3.Account.PublicKey;
                 tx.Add(createSessionIX);
                 Debug.Log("Has no session -> partial sign");
-                tx.PartialSign(new[] {Web3.Account, sessionWallet.Account});
+                tx.PartialSign(new[] { Web3.Account, sessionWallet.Account });
             }
         }
 
@@ -407,12 +401,12 @@ public class BrawlAnchorService : MonoBehaviour
         await SubscribeToColosseumUpdates();
     }
 
-    private async Task<bool> SendAndConfirmTransaction(WalletBase wallet, Transaction transaction, string label = "",
+    public async Task<bool> SendAndConfirmTransaction(WalletBase wallet, Transaction transaction, string label = "",
         Action onSucccess = null, Action<string> onError = null, bool isBlocking = true)
     {
         (isBlocking ? ref blockingTransactionsInProgress : ref nonBlockingTransactionsInProgress)++;
         LastError = String.Empty;
-        
+
         Debug.Log("Sending and confirming transaction: " + label);
         RequestResult<string> res;
         try
@@ -644,7 +638,7 @@ public class BrawlAnchorService : MonoBehaviour
         await RefreshSessionWallet();
         var sessionIx = sessionWallet.CreateSessionIX(true, GetSessionKeysEndTime());
         transaction.Add(sessionIx);
-        transaction.PartialSign(new[] {Web3.Account, sessionWallet.Account});
+        transaction.PartialSign(new[] { Web3.Account, sessionWallet.Account });
 
         var res = await Web3.Wallet.SignAndSendTransaction(transaction, commitment: Commitment.Confirmed);
 

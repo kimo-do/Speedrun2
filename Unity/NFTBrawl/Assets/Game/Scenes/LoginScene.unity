@@ -1367,8 +1367,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LoadedNfts: []
   LocalDummyNft: {fileID: 2800000, guid: c8663869476f9414a94374f096f61c57, type: 3}
-  LoadNftsOnStartUp: 1
-  AddDummyNft: 1
+  LoadNftsOnStartUp: 0
+  AddDummyNft: 0
 --- !u!1 &802737248
 GameObject:
   m_ObjectHideFlags: 0
