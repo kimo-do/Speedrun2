@@ -361,7 +361,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0.00012207031}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8029027132157631009
@@ -667,7 +667,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 8029027133077909128}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -936,7 +936,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 1.5, y: -101.650024}
-  m_SizeDelta: {x: -1159, y: 163}
+  m_SizeDelta: {x: -374.7732, y: 163}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8029027133236354151
 CanvasRenderer:
@@ -960,7 +960,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -968,8 +968,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Choose your wallet
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b84236bbbebf4341b8b15efaf1e4a8f, type: 2}
+  m_sharedMaterial: {fileID: -5529028027630454844, guid: 1b84236bbbebf4341b8b15efaf1e4a8f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1149,7 +1149,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 5.5, y: -48.889343}
-  m_SizeDelta: {x: -583, y: -359.77942}
+  m_SizeDelta: {x: -83.4185, y: -359.7794}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8029027133427204342
 CanvasRenderer:

@@ -146,7 +146,6 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnLoginWalletAdapterButtonClicked()
     {
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
         await Web3.Instance.LoginWalletAdapter();
     }
 
