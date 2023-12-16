@@ -144,6 +144,14 @@
           ]
         },
         {
+          "name": "profile",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The profile of the owner of the new clone."
+          ]
+        },
+        {
           "name": "payer",
           "isMut": true,
           "isSigner": true,
@@ -157,20 +165,18 @@
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": "CreateCloneArgs"
-          }
-        }
-      ]
+      "args": []
     },
     {
       "name": "startBrawl",
       "accounts": [
         {
           "name": "brawl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "colosseum",
           "isMut": true,
           "isSigner": false
         },
@@ -432,21 +438,6 @@
   ],
   "types": [
     {
-      "name": "CreateCloneArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "name",
-            "docs": [
-              "The name of the clone."
-            ],
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateProfileArgs",
       "type": {
         "kind": "struct",
@@ -540,6 +531,14 @@
       "code": 6004,
       "name": "InvalidBrawl",
       "msg": "Invalid Brawl."
+    },
+    {
+      "code": 6005,
+      "name": "InvalidOwner",
+      "msg": "Invalid Owner of the Brawler."
     }
-  ]
+  ],
+  "metadata": {
+    "address": "BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ"
+  }
 }

@@ -32,8 +32,8 @@ pub mod deathbattle {
         CreateGraveyard::handler(ctx)
     }
 
-    pub fn create_clone(ctx: Context<CreateClone>, args: CreateCloneArgs) -> Result<()> {
-        CreateClone::handler(ctx, args)
+    pub fn create_clone(ctx: Context<CreateClone>) -> Result<()> {
+        CreateClone::handler(ctx)
     }
 
     pub fn start_brawl(ctx: Context<StartBrawl>) -> Result<()> {

@@ -21,4 +21,8 @@ pub enum BrawlError {
     /// 1003 - Invalid Brawl.
     #[msg("Invalid Brawl.")]
     InvalidBrawl,
+
+    /// 1004 - Invalid Owner.
+    #[msg("Invalid Owner of the Brawler.")]
+    InvalidOwner,
 }

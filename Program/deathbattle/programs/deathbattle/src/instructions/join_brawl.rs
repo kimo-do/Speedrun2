@@ -14,13 +14,18 @@ pub struct JoinBrawlArgs {
 pub struct JoinBrawl<'info> {
     #[account(mut)]
     pub clone_lab: Account<'info, CloneLab>,
+
     #[account(mut)]
     pub colosseum: Account<'info, Colosseum>,
+
     #[account(mut)]
     pub brawl: Account<'info, Brawl>,
+
     pub brawler: Account<'info, Brawler>,
+
     #[account(mut)]
     pub payer: Signer<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -34,7 +39,11 @@ impl<'info> JoinBrawl<'info> {
             .iter()
             .position(|value| *value == args.brawler)
         {
-            ctx.accounts.clone_lab.brawlers.swap_remove(index);
+            if ctx.accounts.brawler.owner == ctx.accounts.payer.key() {
+                ctx.accounts.clone_lab.brawlers.swap_remove(index);
+            } else {
+                return err!(BrawlError::InvalidOwner);
+            }
         } else {
             return err!(BrawlError::InvalidBrawler);
         }
