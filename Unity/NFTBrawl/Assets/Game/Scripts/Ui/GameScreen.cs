@@ -128,6 +128,13 @@ public class GameScreen : MonoBehaviour
         profileScreen.Toggle(true);
     }
 
+    public void OpenBrawl()
+    {
+        AudioManager.instance.PlayBattleMusic();
+        DisableAllScreens();
+        brawlScreen.Toggle(true);
+    }
+
     private void DisableAllScreens()
     {
         profileScreen.Toggle(false);

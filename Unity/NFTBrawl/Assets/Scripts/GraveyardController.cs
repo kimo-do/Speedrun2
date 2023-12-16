@@ -22,6 +22,7 @@ public class GraveyardController : Window
     public float brightnessOnSummon;
     public ParticleSystem idlePS;
     public ParticleSystem boomPS;
+    public AudioSource summonAudio;
 
     private Coroutine glowLight;
 
@@ -102,6 +103,7 @@ public class GraveyardController : Window
 
     public void SummonEffect()
     {
+        summonAudio.Play();
         cloneCapsuleAnimator.SetTrigger("Clone");
         capsuleLight.GetComponent<Animation>().Stop();
         idlePS.Stop();

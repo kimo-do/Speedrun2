@@ -22,6 +22,8 @@ public class LoginScreen : MonoBehaviour
 
     public Button editorLoginButton;
     public Button loginWalletAdapterButton;
+    public Button audioToggle;
+
 
     public Volume globalVolume;
 
@@ -35,6 +37,7 @@ public class LoginScreen : MonoBehaviour
     public TextMeshProUGUI errorText;
 
     private bool creatingProfile = false;
+    private bool audioOn = true;
     private float loginTime;
 
     private ChromaticAberration chromaticAberration;
@@ -55,6 +58,7 @@ public class LoginScreen : MonoBehaviour
         editorLoginButton.onClick.AddListener(OnEditorLoginClicked);
         loginWalletAdapterButton.onClick.AddListener(OnLoginWalletAdapterButtonClicked);
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        audioToggle.onClick.AddListener(ToggleAudio);
 
         BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
@@ -62,6 +66,23 @@ public class LoginScreen : MonoBehaviour
         BrawlAnchorService.OnProfileChanged += OnProfileChanged;
 
         StartCoroutine(ChromaticLoop());
+
+        AudioManager.instance.menuMusic.Play();
+    }
+
+    private void ToggleAudio()
+    {
+        this.audioOn = !audioOn;
+        AudioManager.instance.ToggleMute(this.audioOn);
+
+        if (audioOn)
+        {
+            audioToggle.GetComponent<Image>().sprite = AudioManager.instance.unMutedSprite;
+        }
+        else
+        {
+            audioToggle.GetComponent<Image>().sprite = AudioManager.instance.mutedSprite;
+        }
     }
 
     IEnumerator ChromaticLoop()
@@ -85,6 +106,7 @@ public class LoginScreen : MonoBehaviour
 
             if (isInitialized)
             {
+                AudioManager.instance.menuMusic.Stop();
                 SceneManager.LoadScene("LobbyScene");
             }
             else if (!creatingProfile)
