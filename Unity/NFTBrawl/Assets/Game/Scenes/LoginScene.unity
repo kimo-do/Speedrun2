@@ -1930,7 +1930,7 @@ MonoBehaviour:
       name: Solana.Unity-SDK
       keepConnectionAlive: 1
     solanaWalletAdapterWebGLOptions:
-      walletAdapterButtonPrefab: {fileID: 6907590662913690787, guid: 32324df33e4010743af64597b2ef3804, type: 3}
+      walletAdapterButtonPrefab: {fileID: 6907590662913690787, guid: 4c70f060ac6fd2941beed637081a779e, type: 3}
       walletAdapterUIPrefab: {fileID: 8029027132386834937, guid: 256e92be2288f4b68b207a43c304ee22, type: 3}
     phantomWalletOptions:
       apiVersion: v1

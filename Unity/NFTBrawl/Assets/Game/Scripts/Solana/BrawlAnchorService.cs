@@ -108,26 +108,22 @@ public class BrawlAnchorService : MonoBehaviour
         sessionWallet = await SessionWallet.GetSessionWallet(AnchorProgramIdPubKey, sessionKeyPassword);
         await UpdateSessionValid();
 
-        //if (!Instance.IsSessionValid())
-        //{
-        //    await Instance.UpdateSessionValid();
-        //    ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
-        //    await WaitForCondition();
-        //}
-
         FindPDAs(account);
 
         anchorClient = new DeathbattleClient(Web3.Rpc, Web3.WsRpc, AnchorProgramIdPubKey);
 
         //await SubscribeToPlayerDataUpdates();
+        
         await SubscribeToProfileUpdates();
+        /*
         await SubscribeToCloneLabUpdates();
         await SubscribeToGraveyardUpdates();
         await SubscribeToColosseumUpdates();
+        */
 
         OnInitialDataLoaded?.Invoke();
 
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
+        //BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
     }
 
     private bool conditionMet = false;

@@ -25,11 +25,14 @@ public class GameScreen : MonoBehaviour
     public GraveyardController graveyardScreen;
     public ProfileController profileScreen;
     public BrawlController brawlScreen;
+    public RectTransform initScreen;
 
     [Header("Misc")]
     public Button ChuckWoodSessionButton;
     public Button NftsButton;
     public Button InitGameDataButton;
+    public Button initProfileButton;
+
 
     public TextMeshProUGUI EnergyAmountText;
     public TextMeshProUGUI WoodAmountText;
@@ -74,7 +77,8 @@ public class GameScreen : MonoBehaviour
         profileScreen.Toggle(true);
         //ChuckWoodSessionButton.onClick.AddListener(OnChuckWoodSessionButtonClicked);
         //NftsButton.onClick.AddListener(OnNftsButtonClicked);
-        //InitGameDataButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        InitGameDataButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
         //CharacterStartPosition = ChuckWoodSessionButton.transform.localPosition;
         // In case we are not logged in yet load the LoginScene
         if (Web3.Account == null)
@@ -82,14 +86,48 @@ public class GameScreen : MonoBehaviour
             //SceneManager.LoadScene("LoginScene");
             return;
         }
-        //StartCoroutine(UpdateNextEnergy());
+        StartCoroutine(MonitorSession());
         
         //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
         BrawlAnchorService.OnCloneLabChanged += OnCloneLabChanged;
         BrawlAnchorService.OnGraveyardChanged += OnGraveyardChanged;
-        BrawlAnchorService.OnCloneLabChanged += OnCloneLabChanged;
         BrawlAnchorService.OnColosseumChanged += OnColosseumChanged;
+        //BrawlAnchorService.OnCloneLabChanged += OnCloneLabChanged;
+    }
+
+    private IEnumerator MonitorSession()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            VerifySession();
+        }
+    }
+
+    private void VerifySession()
+    {
+        var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+        if (!isInitialized)
+        {
+            DisableAllScreens();
+            initScreen.gameObject.SetActive(true);
+        }
+        else if (initScreen.gameObject.activeInHierarchy)
+        {
+            DisableAllScreens();
+            profileScreen.Toggle(true);
+        }
+
+        if (BrawlAnchorService.Instance.CurrentProfile == null)
+        {
+            Debug.Log("No profile retrieved, profile is null..");
+        }
+        else
+        {
+            Debug.Log("We have an active profile!");
+        }
     }
 
     private void OnColosseumChanged(Colosseum colosseum)
@@ -140,6 +178,7 @@ public class GameScreen : MonoBehaviour
         profileScreen.Toggle(false);
         graveyardScreen.Toggle(false);
         brawlScreen.Toggle(false);
+        initScreen.gameObject.SetActive(false);
     }
 
     private void OnDestroy()

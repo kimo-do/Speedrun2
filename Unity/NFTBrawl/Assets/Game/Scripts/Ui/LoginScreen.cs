@@ -24,9 +24,7 @@ public class LoginScreen : MonoBehaviour
     public Button loginWalletAdapterButton;
     public Button audioToggle;
 
-
     public Volume globalVolume;
-
 
     // Profile
     public Button initProfileButton;
@@ -60,10 +58,9 @@ public class LoginScreen : MonoBehaviour
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
         audioToggle.onClick.AddListener(ToggleAudio);
 
-        BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
-        BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+        //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         BrawlAnchorService.OnProfileChanged += OnProfileChanged;
+        BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
 
         StartCoroutine(ChromaticLoop());
 
@@ -97,13 +94,18 @@ public class LoginScreen : MonoBehaviour
 
     private void OnProfileChanged(Profile profile)
     {
+        Debug.Log("Profile data callback received");
+
         if (Web3.Account != null)
         {
+            Debug.Log("Web3 account available");
+
             var isInitialized = BrawlAnchorService.Instance.IsInitialized();
             string isInit = isInitialized ? "was" : "not";
 
             Debug.Log($"BrawlAnchorservice {isInit} initialized at this time.");
 
+            /*
             if (isInitialized)
             {
                 AudioManager.instance.menuMusic.Stop();
@@ -117,6 +119,7 @@ public class LoginScreen : MonoBehaviour
                 pubKeyText.text = Web3.Account.PublicKey;
                 usernameInput.text = "";
             }
+            */
         }
     }
 
@@ -124,12 +127,15 @@ public class LoginScreen : MonoBehaviour
     {
         if (Web3.Account != null)
         {
-            var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+            Debug.Log("Initial data load complete");
 
-            if (!isInitialized)
-            {
-                loginTime = Time.time;
-            }
+            SceneManager.LoadScene("LobbyScene");
+            //var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+            //if (!isInitialized)
+            //{
+            //    loginTime = Time.time;
+            //}
         }
         else
         {

@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4130716992226347760}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 523.5468, y: 236.58032, z: -101.23384}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7505526671927023752
 MonoBehaviour:
@@ -65,13 +65,14 @@ MonoBehaviour:
     appName: Solana Unity SDK
     logoLight: 
     logoDark: 
-    defaultLanguage: en
-    dark: 1
+    defaultLanguage: 0
+    mode: 2
     themeName: primary
     themeColor: '#123456'
     redirectUrl: torusapp://com.torus.Web3AuthUnity/auth
     clientId: BO4zGEzyV6DT1vHU46b6GEngOcg2jl5Pmd9Boi8dLdBpBZnS351ulHDz2k7XJ1dEm-DcvyyARivGCZDXrbZng-0
     network: 0
+    loginConfig: []
   solanaWalletAdapterOptions:
     solanaMobileWalletAdapterOptions:
       identityUri: https://solana.unity-sdk.gg/
@@ -79,9 +80,12 @@ MonoBehaviour:
       name: Solana.Unity-SDK
       keepConnectionAlive: 1
     solanaWalletAdapterWebGLOptions:
-      walletAdapterButtonPrefab: {fileID: 0}
-      walletAdapterUIPrefab: {fileID: 0}
+      walletAdapterButtonPrefab: {fileID: 6907590662913690787, guid: 4c70f060ac6fd2941beed637081a779e, type: 3}
+      walletAdapterUIPrefab: {fileID: 8029027132386834937, guid: 256e92be2288f4b68b207a43c304ee22, type: 3}
     phantomWalletOptions:
-      phantomApiVersion: v1
+      apiVersion: v1
       appMetaDataUrl: https://github.com/garbles-labs/Solana.Unity-SDK
       deeplinkUrlScheme: unitydl
+      sessionEncryptionPassword: use a strong password
+      baseUrl: https://phantom.app
+      walletName: phantom
