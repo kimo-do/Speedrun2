@@ -22,9 +22,9 @@ public class LoginScreen : MonoBehaviour
 
     public Button editorLoginButton;
     public Button loginWalletAdapterButton;
+    public Button audioToggle;
 
     public Volume globalVolume;
-
 
     // Profile
     public Button initProfileButton;
@@ -35,6 +35,7 @@ public class LoginScreen : MonoBehaviour
     public TextMeshProUGUI errorText;
 
     private bool creatingProfile = false;
+    private bool audioOn = true;
     private float loginTime;
 
     private ChromaticAberration chromaticAberration;
@@ -55,13 +56,30 @@ public class LoginScreen : MonoBehaviour
         editorLoginButton.onClick.AddListener(OnEditorLoginClicked);
         loginWalletAdapterButton.onClick.AddListener(OnLoginWalletAdapterButtonClicked);
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        audioToggle.onClick.AddListener(ToggleAudio);
 
-        BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
-        BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
+        //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         BrawlAnchorService.OnProfileChanged += OnProfileChanged;
+        BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
 
         StartCoroutine(ChromaticLoop());
+
+        AudioManager.instance.menuMusic.Play();
+    }
+
+    private void ToggleAudio()
+    {
+        this.audioOn = !audioOn;
+        AudioManager.instance.ToggleMute(this.audioOn);
+
+        if (audioOn)
+        {
+            audioToggle.GetComponent<Image>().sprite = AudioManager.instance.unMutedSprite;
+        }
+        else
+        {
+            audioToggle.GetComponent<Image>().sprite = AudioManager.instance.mutedSprite;
+        }
     }
 
     IEnumerator ChromaticLoop()
@@ -76,15 +94,21 @@ public class LoginScreen : MonoBehaviour
 
     private void OnProfileChanged(Profile profile)
     {
+        Debug.Log("Profile data callback received");
+
         if (Web3.Account != null)
         {
+            Debug.Log("Web3 account available");
+
             var isInitialized = BrawlAnchorService.Instance.IsInitialized();
             string isInit = isInitialized ? "was" : "not";
 
             Debug.Log($"BrawlAnchorservice {isInit} initialized at this time.");
 
+            /*
             if (isInitialized)
             {
+                AudioManager.instance.menuMusic.Stop();
                 SceneManager.LoadScene("LobbyScene");
             }
             else if (!creatingProfile)
@@ -95,6 +119,7 @@ public class LoginScreen : MonoBehaviour
                 pubKeyText.text = Web3.Account.PublicKey;
                 usernameInput.text = "";
             }
+            */
         }
     }
 
@@ -102,12 +127,15 @@ public class LoginScreen : MonoBehaviour
     {
         if (Web3.Account != null)
         {
-            var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+            Debug.Log("Initial data load complete");
 
-            if (!isInitialized)
-            {
-                loginTime = Time.time;
-            }
+            SceneManager.LoadScene("LobbyScene");
+            //var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+            //if (!isInitialized)
+            //{
+            //    loginTime = Time.time;
+            //}
         }
         else
         {
@@ -124,7 +152,6 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnLoginWalletAdapterButtonClicked()
     {
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
         await Web3.Instance.LoginWalletAdapter();
     }
 
@@ -167,12 +194,12 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnEditorLoginClicked()
     {
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
+        //BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
 
         var newMnemonic = new Mnemonic(WordList.English, WordCount.Twelve);
 
         // Dont use this one for production. Its only ment for editor login
-        var account = await Web3.Instance.LoginInGameWallet("1234") ??
-                      await Web3.Instance.CreateAccount(newMnemonic.ToString(), "1234");
+        var account = await Web3.Instance.LoginInGameWallet("12345") ??
+                      await Web3.Instance.CreateAccount(newMnemonic.ToString(), "12345");
     }
 }

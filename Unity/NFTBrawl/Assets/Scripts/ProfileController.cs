@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[ExecuteInEditMode]
 public class ProfileController : Window
 {
     public RectTransform noBrawlers;
@@ -45,14 +44,13 @@ public class ProfileController : Window
 
     private void UpdateProfileView()
     {
-        yourBrawlers.gameObject.SetActive(false);
+        yourBrawlers.gameObject.SetActive(true);
         openLobby.gameObject.SetActive(false);
         joinOpenLobbyButton.gameObject.SetActive(false);
         joinOpenLobbyButton.interactable = false;
 
         if (gameObjects.Count > 0)
         {
-            yourBrawlers.gameObject.SetActive(true);
             joinOpenLobbyButton.interactable = true;
         }
 
@@ -74,7 +72,7 @@ public class ProfileController : Window
 
         //PositionGameObjects();
         noBrawlers.gameObject.SetActive(true);
-        yourBrawlers.gameObject.SetActive(false);
+        yourBrawlers.gameObject.SetActive(true);
     }
 
     private void ClickedJoinLobby()

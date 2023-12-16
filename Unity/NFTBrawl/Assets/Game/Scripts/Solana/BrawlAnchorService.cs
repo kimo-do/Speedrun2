@@ -114,14 +114,35 @@ public class BrawlAnchorService : MonoBehaviour
         anchorClient = new DeathbattleClient(Web3.Rpc, Web3.WsRpc, AnchorProgramIdPubKey);
 
         //await SubscribeToPlayerDataUpdates();
+        
         await SubscribeToProfileUpdates();
+        /*
         await SubscribeToCloneLabUpdates();
         await SubscribeToGraveyardUpdates();
         await SubscribeToColosseumUpdates();
+        */
 
         OnInitialDataLoaded?.Invoke();
 
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
+        //BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
+    }
+
+    private bool conditionMet = false;
+
+    private async Task WaitForCondition()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        while (!Instance.IsSessionValid())
+        {
+            await Task.Delay(100); // Check the condition every 100ms
+            if (Instance.IsSessionValid())
+            {
+                tcs.SetResult(true);
+            }
+        }
+
+        await tcs.Task;
     }
 
     private void FindPDAs(Account account)
@@ -162,6 +183,19 @@ public class BrawlAnchorService : MonoBehaviour
             {
                 Debug.Log("Airdrop failed. You can go to faucet.solana.com and request sol for this key: " + Web3.Instance.WalletBase.Account.PublicKey);
             }
+            else
+            {
+                Debug.Log("Airdrop succesful.");
+
+                if (solBalance < 0.8f)
+                {
+                    Debug.Log("Sol balance still too low. You can go to faucet.solana.com and request sol for this key: " + Web3.Instance.WalletBase.Account.PublicKey);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Sufficient Sol in wallet: " + solBalance.ToString());
         }
     }
 
