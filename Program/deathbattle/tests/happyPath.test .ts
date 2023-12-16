@@ -25,16 +25,16 @@ describe("deathbattle", () => {
       program.programId
     );
     // const createProfileTx = await anchor.getProvider().sendAndConfirm(
-      await program.methods
-        .createProfile({
-          username: "Blockiosaurus"
-        })
-        .accounts({
-          profile: profileAddress[0],
-          payer: player.publicKey,
-        })
-        .signers([player])
-        .rpc({skipPreflight: true});
+    await program.methods
+      .createProfile({
+        username: "Blockiosaurus"
+      })
+      .accounts({
+        profile: profileAddress[0],
+        payer: player.publicKey,
+      })
+      .signers([player])
+      .rpc({ skipPreflight: true });
     //   [player]
     // );
 
@@ -81,26 +81,30 @@ describe("deathbattle", () => {
 
     await printState(program, cloneLabAddress[0], colosseumAddress[0], graveyardAddress[0]);
 
-    // Create a brawler in the Clone Lab.
-    let cloneLab = await program.account.cloneLab.fetch(cloneLabAddress[0]);
-    let numBrawlersSeed = new anchor.BN(cloneLab.numBrawlers).toBuffer("le", 2);
-    const brawlerAddress = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("brawler"), cloneLabAddress[0].toBuffer(), numBrawlersSeed],
-      program.programId
-    );
-    const createBrawlerTx = await program.methods
-      .createClone()
-      .accounts({
-        cloneLab: cloneLabAddress[0],
-        brawler: brawlerAddress[0],
-        profile: profileAddress[0],
-        payer: player.publicKey,
-        slotHashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
-      })
-      .signers([player])
-      .rpc({skipPreflight: true});
-    const brawler = await program.account.brawler.fetch(brawlerAddress[0]);
-    console.log("Brawler:", brawler);
+    let brawlerAddresses: [anchor.web3.PublicKey, number][] = [];
+    let brawlers = [];
+    // Create brawlers in the Clone Lab.
+    for (let i = 0; i < 8; i++) {
+      let cloneLab = await program.account.cloneLab.fetch(cloneLabAddress[0]);
+      let numBrawlersSeed = new anchor.BN(cloneLab.numBrawlers).toBuffer("le", 2);
+      brawlerAddresses.push(anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("brawler"), cloneLabAddress[0].toBuffer(), numBrawlersSeed],
+        program.programId
+      ));
+      const createBrawlerTx = await program.methods
+        .createClone()
+        .accounts({
+          cloneLab: cloneLabAddress[0],
+          brawler: brawlerAddresses[i][0],
+          profile: profileAddress[0],
+          payer: player.publicKey,
+          slotHashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
+        })
+        .signers([player])
+        .rpc({ skipPreflight: true });
+      brawlers.push(await program.account.brawler.fetch(brawlerAddresses[i][0]));
+      console.log("Brawler:", brawlers[i]);
+    }
 
     await printState(program, cloneLabAddress[0], colosseumAddress[0], graveyardAddress[0]);
   });
