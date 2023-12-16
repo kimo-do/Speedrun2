@@ -25,6 +25,8 @@ pub struct Brawl {
     pub bump: u8,
     /// The queue of Brawler Pubkeys.
     pub queue: Vec<Pubkey>,
+    /// The winner
+    pub winner: Pubkey,
     /// The match up list
     pub matches: Vec<Match>,
 }

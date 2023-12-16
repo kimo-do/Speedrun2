@@ -393,6 +393,21 @@ public class BrawlAnchorService : MonoBehaviour
         OnColosseumChanged?.Invoke(colosseum);
     }
 
+    private async Task<List<Brawler>> FetchAllReadyBrawlers(CloneLab cloneLab)
+    {
+        List<Brawler> readyBrawlers = new List<Brawler>();
+        foreach (var brawler in cloneLab.Brawlers)
+        {
+            var brawlerData = await anchorClient.GetBrawlerAsync(brawler, Commitment.Confirmed);
+            if (brawlerData.ParsedResult != null && brawlerData.ParsedResult.Owner == Web3.Account.PublicKey)
+            {
+                readyBrawlers.Add(brawlerData.ParsedResult);
+            }
+        }
+
+        return readyBrawlers;
+    }
+
     public async Task InitAccounts(bool useSession, string username)
     {
         var tx = new Transaction()
