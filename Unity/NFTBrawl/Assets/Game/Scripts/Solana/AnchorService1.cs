@@ -224,7 +224,7 @@ public class AnchorService1 : MonoBehaviour
         var initTx = LumberjackProgram.InitPlayer(accounts, levelSeed, AnchorProgramIdPubKey);
         tx.Add(initTx);
 
-        if (true)
+        if (false)
         {
             if (!(await IsSessionTokenInitialized()))
             {

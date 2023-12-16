@@ -12,6 +12,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Deathbattle.Accounts;
+using Solana.Unity.Rpc.Models;
+using Deathbattle.Program;
+using Solana.Unity.Programs;
+using Solana.Unity.Wallet;
+using System.Text;
 
 /// <summary>
 /// This is the screen which handles the interaction with the anchor program.
@@ -65,6 +70,9 @@ public class GameScreen : MonoBehaviour
     private bool initialSubcribed;
 
     public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
+
+    // The PDAs
+    public PublicKey BrawlerPDA;
 
     private void Awake()
     {
@@ -309,18 +317,62 @@ public class GameScreen : MonoBehaviour
         });
     }
 
-    public void AttemptCreateBrawler()
+    public async void AttemptCreateBrawler()
     {
         GraveyardController.Instance.SummonEffect();
 
         if (BrawlAnchorService.Instance.CurrentProfile != null)
         {
+            var tx = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash()
+        };
+
+        PublicKey.TryFindProgramAddress(new[]
+                {Encoding.UTF8.GetBytes("brawler"), BrawlAnchorService.Instance.CloneLabPDA.KeyBytes, BitConverter.GetBytes(BrawlAnchorService.Instance.CurrentCloneLab.NumBrawlers)},
+            BrawlAnchorService.AnchorProgramIdPubKey, out BrawlerPDA, out byte brawlerBump);
+
+        CreateCloneAccounts ccAccounts = new CreateCloneAccounts
+        {
+            CloneLab = BrawlAnchorService.Instance.CloneLabPDA,
+            Brawler = BrawlerPDA,
+            Profile = BrawlAnchorService.Instance.ProfilePDA,
+            Payer = Web3.Account.PublicKey,
+            SystemProgram = SystemProgram.ProgramIdKey,
+            SlotHashes = new PublicKey("SysvarS1otHashes111111111111111111111111111"),
+        };
+
+        var initTx = DeathbattleProgram.CreateClone(ccAccounts, BrawlAnchorService.AnchorProgramIdPubKey);
+        tx.Add(initTx);
+
+        if (true)
+        {
+            if (!(await BrawlAnchorService.Instance.IsSessionTokenInitialized()))
+            {
+                var topUp = true;
+
+                var validity = BrawlAnchorService.Instance.GetSessionKeysEndTime();
+                var createSessionIX = BrawlAnchorService.Instance.sessionWallet.CreateSessionIX(topUp, validity);
+                ccAccounts.Payer = Web3.Account.PublicKey;
+                tx.Add(createSessionIX);
+                Debug.Log("Has no session -> partial sign");
+                tx.PartialSign(new[] {Web3.Account, BrawlAnchorService.Instance.sessionWallet.Account});
+            }
+        }
+
+        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "create_clone",
+            () => { Debug.Log("Create clone was successful"); }, s => { Debug.LogError("Create Clone was not successful"); });
+            
             BrawlAnchorService.Instance.CreateBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
             {
                 // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
                 Debug.Log("Created a brawler!");
             });
         }
+
+        
     }
 
     public void AttemptReviveBrawler()
