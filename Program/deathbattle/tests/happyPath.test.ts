@@ -107,6 +107,28 @@ describe("deathbattle", () => {
     }
 
     await printState(program, cloneLabAddress[0], colosseumAddress[0], graveyardAddress[0]);
+
+    // Create a brawl in the Colosseum.
+    let brawlAddresses: [anchor.web3.PublicKey, number][] = [];
+    const colosseum = await program.account.colosseum.fetch(colosseumAddress[0]);
+    let numBrawlsSeed = new anchor.BN(colosseum.numBrawls).toBuffer("le", 4);
+      brawlAddresses.push(anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("brawl"), colosseumAddress[0].toBuffer(), numBrawlsSeed],
+        program.programId
+      ));
+    const createBrawlTx = await program.methods
+      .startBrawl()
+      .accounts({
+        brawl: brawlAddresses[0][0],
+        colosseum: colosseumAddress[0],
+        payer: player.publicKey,
+      })
+      .signers([player])
+      .rpc({ skipPreflight: true });
+    const brawl = await program.account.brawl.fetch(brawlAddresses[0][0]);
+    console.log("Brawl:", brawl);
+
+    await printState(program, cloneLabAddress[0], colosseumAddress[0], graveyardAddress[0]);
   });
 
   async function printState(program: Program<Deathbattle>, cloneLabAddress: anchor.web3.PublicKey, colosseumAddress: anchor.web3.PublicKey, graveyardAddress: anchor.web3.PublicKey) {

@@ -10,7 +10,6 @@ pub struct StartBrawl<'info> {
         space=Brawl::LEN,
         seeds=[
             b"brawl".as_ref(),
-            payer.key().as_ref(),
             colosseum.key().as_ref(),
             colosseum.num_brawls.to_le_bytes().as_ref()
         ],
