@@ -52,6 +52,9 @@ public class GameScreen : MonoBehaviour
     public GameObject ActionFxPosition;
     public GameObject Tree;
 
+    public TextMeshProUGUI errorMessage;
+    public Animation errorMessageAnim;
+
     [Header("Prefabs")]
     public GameObject brawlerPfb;
     
@@ -68,6 +71,7 @@ public class GameScreen : MonoBehaviour
 
     private List<BrawlerData> myBrawlers = new();
     private bool initialSubcribed;
+    private Coroutine errorRoutine;
 
     public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
 
@@ -77,6 +81,32 @@ public class GameScreen : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    public void ShowError(string message, float duration)
+    {
+        if (errorRoutine != null)
+        {
+            StopCoroutine(errorRoutine);
+        }
+
+        errorRoutine = StartCoroutine(ShowErrorRoutine(message, duration));
+    }
+
+    IEnumerator ShowErrorRoutine(string message, float duration)
+    {
+        errorMessage.text = message;
+        errorMessageAnim["errorpo"].time = 0;
+        errorMessageAnim["errorpo"].speed = 1f;
+
+        errorMessageAnim.Play("errorpo");
+
+        yield return new WaitForSeconds(duration);
+
+        errorMessageAnim["errorpo"].time = errorMessageAnim["errorpo"].length;
+        errorMessageAnim["errorpo"].speed = -1f;
+
+        errorMessageAnim.Play("errorpo");
     }
 
     void Start()
@@ -209,7 +239,6 @@ public class GameScreen : MonoBehaviour
         //BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
         BrawlAnchorService.OnCloneLabChanged -= OnCloneLabChanged;
         BrawlAnchorService.OnGraveyardChanged -= OnGraveyardChanged;
-        BrawlAnchorService.OnCloneLabChanged -= OnCloneLabChanged;
     }
 
     private void OnEnable()
@@ -264,6 +293,12 @@ public class GameScreen : MonoBehaviour
         currentGameData = cloneLab;
         */
         currentCloneLab = cloneLab;
+
+        if (currentCloneLab != null)
+        {
+            Debug.Log($"Received clonelab update, brawlers: {currentCloneLab.Brawlers.Length}, number: {currentCloneLab.NumBrawlers}");
+            BrawlersRetrieved?.Invoke();
+        }
     }
 
     private void UpdateContent()
@@ -317,62 +352,43 @@ public class GameScreen : MonoBehaviour
         });
     }
 
-    public async void AttemptCreateBrawler()
+    public void AttemptCreateBrawler()
     {
-        GraveyardController.Instance.SummonEffect();
+        AttemptCreateAsync();
+    }
 
+    private double solBalance = 0;
+
+    private async void AttemptCreateAsync()
+    {
+        solBalance = await Web3.Instance.WalletBase.GetBalance();
+
+        MainThreadDispatcher.Instance().Enqueue(ContinueCreateBrawler);
+    }
+
+    private void ContinueCreateBrawler()
+    {
         if (BrawlAnchorService.Instance.CurrentProfile != null)
         {
-            var tx = new Transaction()
-        {
-            FeePayer = Web3.Account,
-            Instructions = new List<TransactionInstruction>(),
-            RecentBlockHash = await Web3.BlockHash()
-        };
-
-        PublicKey.TryFindProgramAddress(new[]
-                {Encoding.UTF8.GetBytes("brawler"), BrawlAnchorService.Instance.CloneLabPDA.KeyBytes, BitConverter.GetBytes(BrawlAnchorService.Instance.CurrentCloneLab.NumBrawlers)},
-            BrawlAnchorService.AnchorProgramIdPubKey, out BrawlerPDA, out byte brawlerBump);
-
-        CreateCloneAccounts ccAccounts = new CreateCloneAccounts
-        {
-            CloneLab = BrawlAnchorService.Instance.CloneLabPDA,
-            Brawler = BrawlerPDA,
-            Profile = BrawlAnchorService.Instance.ProfilePDA,
-            Payer = Web3.Account.PublicKey,
-            SystemProgram = SystemProgram.ProgramIdKey,
-            SlotHashes = new PublicKey("SysvarS1otHashes111111111111111111111111111"),
-        };
-
-        var initTx = DeathbattleProgram.CreateClone(ccAccounts, BrawlAnchorService.AnchorProgramIdPubKey);
-        tx.Add(initTx);
-
-        if (true)
-        {
-            if (!(await BrawlAnchorService.Instance.IsSessionTokenInitialized()))
+            if (solBalance >= 1.0)
             {
-                var topUp = true;
+                GraveyardController.Instance.SummonEffect();
 
-                var validity = BrawlAnchorService.Instance.GetSessionKeysEndTime();
-                var createSessionIX = BrawlAnchorService.Instance.sessionWallet.CreateSessionIX(topUp, validity);
-                ccAccounts.Payer = Web3.Account.PublicKey;
-                tx.Add(createSessionIX);
-                Debug.Log("Has no session -> partial sign");
-                tx.PartialSign(new[] {Web3.Account, BrawlAnchorService.Instance.sessionWallet.Account});
+                BrawlAnchorService.Instance.CreateBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
+                {
+                    // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
+                    Debug.Log("Created a brawler!");
+                });
+            }
+            else
+            {
+                ShowError("Insufficient Sol Balance!", 2f);
             }
         }
-
-        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "create_clone",
-            () => { Debug.Log("Create clone was successful"); }, s => { Debug.LogError("Create Clone was not successful"); });
-            
-            BrawlAnchorService.Instance.CreateBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
-            {
-                // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
-                Debug.Log("Created a brawler!");
-            });
+        else
+        {
+            ShowError("No user profile found!", 2f);
         }
-
-        
     }
 
     public void AttemptReviveBrawler()
