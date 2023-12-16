@@ -23,6 +23,7 @@ public class GraveyardController : Window
     public ParticleSystem idlePS;
     public ParticleSystem boomPS;
     public AudioSource summonAudio;
+    public Animator revealBrawlerAnimator;
 
     private Coroutine glowLight;
 
@@ -103,8 +104,10 @@ public class GraveyardController : Window
 
     public void SummonEffect()
     {
+        cloneCapsuleAnimator.SetBool("Clone", true);
+        cloneCapsuleAnimator.SetTrigger("Reset");
+        revealBrawlerAnimator.SetTrigger("Reset");
         summonAudio.Play();
-        cloneCapsuleAnimator.SetTrigger("Clone");
         capsuleLight.GetComponent<Animation>().Stop();
         idlePS.Stop();
 
@@ -114,13 +117,13 @@ public class GraveyardController : Window
         }
 
         glowLight = StartCoroutine(GlowLight());
-        //StartCoroutine(DoAfterWhile(2f));
+        StartCoroutine(DoAfterWhile(3.3f));
     }
 
     IEnumerator DoAfterWhile(float seconds)
     {
         yield return new WaitForSeconds(seconds);
-        boomPS.Emit(25);
+        revealBrawlerAnimator.SetTrigger("Reveal");
     }
 
     public void IdleGlowEffect()

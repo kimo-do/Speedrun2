@@ -102,12 +102,18 @@ public class BrawlAnchorService : MonoBehaviour
     private async void OnLogin(Account account)
     {
         Debug.Log("Logged in with pubkey: " + account.PublicKey);
-
-        
+     
         await RequestAirdropIfSolValueIsLow();
         
         sessionWallet = await SessionWallet.GetSessionWallet(AnchorProgramIdPubKey, sessionKeyPassword);
         await UpdateSessionValid();
+
+        //if (!Instance.IsSessionValid())
+        //{
+        //    await Instance.UpdateSessionValid();
+        //    ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
+        //    await WaitForCondition();
+        //}
 
         FindPDAs(account);
 
@@ -122,6 +128,24 @@ public class BrawlAnchorService : MonoBehaviour
         OnInitialDataLoaded?.Invoke();
 
         BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
+    }
+
+    private bool conditionMet = false;
+
+    private async Task WaitForCondition()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        while (!Instance.IsSessionValid())
+        {
+            await Task.Delay(100); // Check the condition every 100ms
+            if (Instance.IsSessionValid())
+            {
+                tcs.SetResult(true);
+            }
+        }
+
+        await tcs.Task;
     }
 
     private void FindPDAs(Account account)
@@ -162,6 +186,19 @@ public class BrawlAnchorService : MonoBehaviour
             {
                 Debug.Log("Airdrop failed. You can go to faucet.solana.com and request sol for this key: " + Web3.Instance.WalletBase.Account.PublicKey);
             }
+            else
+            {
+                Debug.Log("Airdrop succesful.");
+
+                if (solBalance < 0.8f)
+                {
+                    Debug.Log("Sol balance still too low. You can go to faucet.solana.com and request sol for this key: " + Web3.Instance.WalletBase.Account.PublicKey);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Sufficient Sol in wallet: " + solBalance.ToString());
         }
     }
 

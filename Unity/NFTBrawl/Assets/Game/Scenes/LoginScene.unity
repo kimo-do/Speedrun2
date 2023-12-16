@@ -1791,8 +1791,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LoadedNfts: []
   LocalDummyNft: {fileID: 2800000, guid: c8663869476f9414a94374f096f61c57, type: 3}
-  LoadNftsOnStartUp: 1
-  AddDummyNft: 1
+  LoadNftsOnStartUp: 0
+  AddDummyNft: 0
 --- !u!1 &802737248
 GameObject:
   m_ObjectHideFlags: 0
@@ -1846,7 +1846,7 @@ MonoBehaviour:
       name: Solana.Unity-SDK
       keepConnectionAlive: 1
     solanaWalletAdapterWebGLOptions:
-      walletAdapterButtonPrefab: {fileID: 2788795083137714619, guid: f6f9ab42f789a4ec4baa484a9f1d0f97, type: 3}
+      walletAdapterButtonPrefab: {fileID: 6907590662913690787, guid: 32324df33e4010743af64597b2ef3804, type: 3}
       walletAdapterUIPrefab: {fileID: 8029027132386834937, guid: 256e92be2288f4b68b207a43c304ee22, type: 3}
     phantomWalletOptions:
       apiVersion: v1
