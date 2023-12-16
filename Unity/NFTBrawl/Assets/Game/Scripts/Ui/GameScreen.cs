@@ -52,7 +52,11 @@ public class GameScreen : MonoBehaviour
     private CloneLab currentCloneLab;
 
     public Action<int> FalledBrawlersUpdated;
-    public Action<BrawlerData> BrawlerRetrieved;
+    public Action BrawlersRetrieved;
+    public Action<LobbyData> PendingLobbiesRetrieved;
+    public Action<Solana.Unity.Wallet.PublicKey> PendingLobbyRetrieved;
+
+    public Solana.Unity.Wallet.PublicKey PendingLobby;
 
     private List<BrawlerData> myBrawlers = new();
 
@@ -82,13 +86,46 @@ public class GameScreen : MonoBehaviour
         
         //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
         //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
-        BrawlAnchorService.OnCloneLabChanged += OnGameDataChanged;
+        BrawlAnchorService.OnCloneLabChanged += OnCloneLabChanged;
+        BrawlAnchorService.OnGraveyardChanged += OnGraveyardChanged;
+        BrawlAnchorService.OnCloneLabChanged += OnCloneLabChanged;
+        BrawlAnchorService.OnColosseumChanged += OnColosseumChanged;
     }
+
+    private void OnColosseumChanged(Colosseum colosseum)
+    {
+        if (colosseum != null)
+        {
+            Debug.Log("Received colosseum update: " + colosseum.PendingBrawls.Length);
+
+            if (colosseum.PendingBrawls.Length > 0)
+            {
+                PendingLobby = colosseum.PendingBrawls[0];
+                PendingLobbyRetrieved?.Invoke(colosseum.PendingBrawls[0]);
+            }
+        }
+    }
+
+    private void OnGraveyardChanged(Graveyard graveyard)
+    {
+        if (graveyard != null && graveyard.Brawlers != null)
+        {
+            Debug.Log("Received graveyard update: " + graveyard.Brawlers.Length);
+            FalledBrawlersUpdated?.Invoke(graveyard.Brawlers.Length);
+        }
+    }
+
 
     public void OpenLab()
     {
         DisableAllScreens();
         graveyardScreen.Toggle(true);
+    }
+
+    public void OpenProfile()
+    {
+        DisableAllScreens();
+        profileScreen.Toggle(true);
     }
 
     private void DisableAllScreens()
@@ -102,7 +139,9 @@ public class GameScreen : MonoBehaviour
     {
         //BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
         //BrawlAnchorService.OnInitialDataLoaded -= UpdateContent;
-        BrawlAnchorService.OnCloneLabChanged -= OnGameDataChanged;
+        BrawlAnchorService.OnCloneLabChanged -= OnCloneLabChanged;
+        BrawlAnchorService.OnGraveyardChanged -= OnGraveyardChanged;
+        BrawlAnchorService.OnCloneLabChanged -= OnCloneLabChanged;
     }
 
     private void OnEnable()
@@ -141,7 +180,7 @@ public class GameScreen : MonoBehaviour
         UpdateContent();
     }
 
-    private void OnGameDataChanged(CloneLab cloneLab)
+    private void OnCloneLabChanged(CloneLab cloneLab)
     {
         /*
         if (currentGameData != null && currentGameData.TotalWoodCollected != cloneLab.TotalWoodCollected)

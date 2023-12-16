@@ -14,6 +14,7 @@ public class BrawlerData
         Male1 = 1,
         Female1 = 2,
         Bonki = 3,
+        SolBlaze = 4,
     }
 
     public enum BrawlerType

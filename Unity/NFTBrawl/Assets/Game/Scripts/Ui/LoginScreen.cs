@@ -57,7 +57,7 @@ public class LoginScreen : MonoBehaviour
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
 
         BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
-        BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
+        //BrawlAnchorService.OnInitialDataLoaded += UpdateContent;
         BrawlAnchorService.OnInitialDataLoaded += OnInitialDataLoaded;
         BrawlAnchorService.OnProfileChanged += OnProfileChanged;
 
@@ -75,11 +75,6 @@ public class LoginScreen : MonoBehaviour
     }
 
     private void OnProfileChanged(Profile profile)
-    {
-        OnInitialDataLoaded();
-    }
-
-    private void OnInitialDataLoaded()
     {
         if (Web3.Account != null)
         {
@@ -103,6 +98,24 @@ public class LoginScreen : MonoBehaviour
         }
     }
 
+    private void OnInitialDataLoaded()
+    {
+        if (Web3.Account != null)
+        {
+            var isInitialized = BrawlAnchorService.Instance.IsInitialized();
+
+            if (!isInitialized)
+            {
+                loginTime = Time.time;
+            }
+        }
+        else
+        {
+            connectWalletScreen.gameObject.SetActive(true);
+            createProfileScreen.gameObject.SetActive(false);
+        }
+    }
+
     private void OnDestroy()
     {
         BrawlAnchorService.OnPlayerDataChanged -= OnPlayerDataChanged;
@@ -111,6 +124,7 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnLoginWalletAdapterButtonClicked()
     {
+        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
         await Web3.Instance.LoginWalletAdapter();
     }
 
@@ -153,6 +167,8 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnEditorLoginClicked()
     {
+        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
+
         var newMnemonic = new Mnemonic(WordList.English, WordCount.Twelve);
 
         // Dont use this one for production. Its only ment for editor login
