@@ -1,3 +1,4 @@
+using Deathbattle.Accounts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,11 +46,7 @@ public class GraveyardController : Window
     private void OnFallenBrawlersUpdated(int brawlers)
     {
         fallenBrawlersCountText.text = $"Fallen Brawlers: {brawlers}";
-
-        if (brawlers > 0)
-        {
-            cloneFallenButton.interactable = true;
-        }
+        UpdateGraveyardView();
     }
 
     public override void Toggle(bool toggle)
@@ -61,6 +58,7 @@ public class GraveyardController : Window
             cloneVFX.SetActive(true);
             fallenBrawlersCountText.gameObject.SetActive(true);
             IdleGlowEffect();
+            UpdateGraveyardView();
         }
         else
         {
@@ -69,10 +67,27 @@ public class GraveyardController : Window
         }
     }
 
+    private void UpdateGraveyardView()
+    {
+        cloneFallenButton.interactable = false;
+
+        if (BrawlAnchorService.Instance.CurrentGraveyard != null)
+        {
+            int fallenBrawlers = BrawlAnchorService.Instance.CurrentGraveyard.Brawlers.Length;
+
+            fallenBrawlersCountText.text = $"Fallen brawlers: {fallenBrawlers}";
+
+            if (fallenBrawlers > 0)
+            {
+                cloneFallenButton.interactable = true;
+            }
+        }
+    }
+
 
     private void OnClickedClose()
     {
-        Toggle(false);
+        GameScreen.instance.OpenProfile();
     }
 
     private void OnClickedCreateNew()

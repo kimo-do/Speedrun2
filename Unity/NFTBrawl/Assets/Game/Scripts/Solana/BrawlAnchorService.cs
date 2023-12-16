@@ -40,15 +40,19 @@ public class BrawlAnchorService : MonoBehaviour
     public static Action<CloneLab> OnCloneLabChanged;
     public static Action<Graveyard> OnGraveyardChanged;
     public static Action<Profile> OnProfileChanged;
+    public static Action<Colosseum> OnColosseumChanged;
+
     public static Action OnInitialDataLoaded;
 
-    public bool IsAnyBlockingTransactionInProgress => blockingTransactionsInProgress > 0;
+    public bool IsAnyBlockingTransactionInProgress => blockingTransactionsInProgress > 0 || IsAnyBlockingProgress;
     public bool IsAnyNonBlockingTransactionInProgress => nonBlockingTransactionsInProgress > 0;
+
+    public bool IsAnyBlockingProgress { get; set; }
     public PlayerData CurrentPlayerData { get; private set; }
     public CloneLab CurrentCloneLab { get; private set; }
     public Profile CurrentProfile { get; private set; }
     public Graveyard CurrentGraveyard { get; private set; }
-
+    public Colosseum CurrentColosseum { get; private set; }
 
     public int BlockingTransactionsInProgress => blockingTransactionsInProgress;
     public int NonBlockingTransactionsInProgress => nonBlockingTransactionsInProgress;
@@ -98,6 +102,7 @@ public class BrawlAnchorService : MonoBehaviour
     private async void OnLogin(Account account)
     {
         Debug.Log("Logged in with pubkey: " + account.PublicKey);
+
         
         await RequestAirdropIfSolValueIsLow();
         
@@ -109,10 +114,14 @@ public class BrawlAnchorService : MonoBehaviour
         anchorClient = new DeathbattleClient(Web3.Rpc, Web3.WsRpc, AnchorProgramIdPubKey);
 
         //await SubscribeToPlayerDataUpdates();
-        await SubscribeToCloneLabUpdates();
         await SubscribeToProfileUpdates();
+        await SubscribeToCloneLabUpdates();
+        await SubscribeToGraveyardUpdates();
+        await SubscribeToColosseumUpdates();
 
         OnInitialDataLoaded?.Invoke();
+
+        BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
     }
 
     private void FindPDAs(Account account)
@@ -209,7 +218,7 @@ public class BrawlAnchorService : MonoBehaviour
 
         try
         {
-            cloneData = await anchorClient.GetCloneLabAsync(GameDataPDA, Commitment.Confirmed);
+            cloneData = await anchorClient.GetCloneLabAsync(CloneLabPDA, Commitment.Confirmed);
             if (cloneData.ParsedResult != null)
             {
                 CurrentCloneLab = cloneData.ParsedResult;
@@ -218,12 +227,12 @@ public class BrawlAnchorService : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Probably game data not available " + e.Message);
+            Debug.Log("Probably clone lab not available " + e.Message);
         }
 
         if (cloneData != null)
         {
-            await anchorClient.SubscribeCloneLabAsync(GameDataPDA, (state, value, gameData) =>
+            await anchorClient.SubscribeCloneLabAsync(CloneLabPDA, (state, value, gameData) =>
             {
                 OnReceivedCloneLabUpdate(gameData);
             }, Commitment.Processed);
@@ -246,9 +255,9 @@ public class BrawlAnchorService : MonoBehaviour
             profileData = await anchorClient.GetProfileAsync(ProfilePDA, Commitment.Confirmed);
             if (profileData.ParsedResult != null)
             {
+                _isInitialized = true;
                 CurrentProfile = profileData.ParsedResult;
                 OnProfileChanged?.Invoke(profileData.ParsedResult);
-                _isInitialized = true;
             }
         }
         catch (Exception e)
@@ -278,7 +287,7 @@ public class BrawlAnchorService : MonoBehaviour
 
         try
         {
-            graveyardData = await anchorClient.GetGraveyardAsync(ProfilePDA, Commitment.Confirmed);
+            graveyardData = await anchorClient.GetGraveyardAsync(GraveyardPDA, Commitment.Confirmed);
             if (graveyardData.ParsedResult != null)
             {
                 CurrentGraveyard = graveyardData.ParsedResult;
@@ -287,12 +296,12 @@ public class BrawlAnchorService : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Probably profile not available: " + e.Message);
+            Debug.Log("Probably graveyard not available: " + e.Message);
         }
 
         if (graveyardData != null)
         {
-            await anchorClient.SubscribeGraveyardAsync(ProfilePDA, (state, value, gameData) =>
+            await anchorClient.SubscribeGraveyardAsync(GraveyardPDA, (state, value, gameData) =>
             {
                 OnReceivedGraveyardUpdate(gameData);
             }, Commitment.Processed);
@@ -304,6 +313,43 @@ public class BrawlAnchorService : MonoBehaviour
         Debug.Log($"Socket Message: Graveyard fallen brawlers: {graveyard.Brawlers.Length}.");
         CurrentGraveyard = graveyard;
         OnGraveyardChanged?.Invoke(graveyard);
+    }
+
+    private async Task SubscribeToColosseumUpdates()
+    {
+        AccountResultWrapper<Colosseum> colosseumData = null;
+
+        try
+        {
+            colosseumData = await anchorClient.GetColosseumAsync(ColosseumPDA, Commitment.Confirmed);
+            if (colosseumData.ParsedResult != null)
+            {
+                CurrentColosseum = colosseumData.ParsedResult;
+                OnColosseumChanged?.Invoke(colosseumData.ParsedResult);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Probably colosseum not available: " + e.Message);
+        }
+
+        if (colosseumData != null)
+        {
+            await anchorClient.SubscribeColosseumAsync(ColosseumPDA, (state, value, gameData) =>
+            {
+                OnReceivedColosseumUpdate(gameData);
+            }, Commitment.Processed);
+        }
+    }
+
+    private void OnReceivedColosseumUpdate(Colosseum colosseum)
+    {
+        Debug.Log($"Socket Message: Colosseum found pending lobbies: {colosseum.PendingBrawls.Length}.");
+        Debug.Log($"Socket Message: Colosseum found active lobbies: {colosseum.ActiveBrawls.Length}.");
+        Debug.Log($"Socket Message: Colosseum found total lobbies: {colosseum.NumBrawls}.");
+
+        CurrentColosseum = colosseum;
+        OnColosseumChanged?.Invoke(colosseum);
     }
 
     public async Task InitAccounts(bool useSession, string username)
@@ -355,8 +401,10 @@ public class BrawlAnchorService : MonoBehaviour
             () => { Debug.Log("Init account was successful"); }, s => { Debug.LogError("Init was not successful"); });
 
         await UpdateSessionValid();
-        //await SubscribeToPlayerDataUpdates();
         await SubscribeToProfileUpdates();
+        await SubscribeToGraveyardUpdates();
+        await SubscribeToCloneLabUpdates();
+        await SubscribeToColosseumUpdates();
     }
 
     private async Task<bool> SendAndConfirmTransaction(WalletBase wallet, Transaction transaction, string label = "",
@@ -414,6 +462,64 @@ public class BrawlAnchorService : MonoBehaviour
         await sessionWallet.CloseSession();
         Debug.Log("Session closed");
     }
+
+    //public async void JoinBrawl(bool useSession, PublicKey brawler, PublicKey pendingBrawlLobby, Action onSuccess)
+    //{
+    //    if (!Instance.IsSessionValid())
+    //    {
+    //        await Instance.UpdateSessionValid();
+    //        ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
+    //        return;
+    //    }
+
+    //    var transaction = new Transaction()
+    //    {
+    //        FeePayer = Web3.Account,
+    //        Instructions = new List<TransactionInstruction>(),
+    //        RecentBlockHash = await Web3.BlockHash(maxSeconds: 15)
+    //    };
+
+    //    JoinBrawlAccounts joinBrawlAccounts = new JoinBrawlAccounts
+    //    {
+    //        Brawl = pendingBrawlLobby,
+    //        Brawler = brawler,
+    //        Payer = Web3.Account,
+    //        Colosseum = ColosseumPDA,
+    //        CloneLab = CloneLabPDA,
+    //        SystemProgram = SystemProgram.ProgramIdKey
+    //    };
+
+    //    JoinBrawlArgs jbArgs = new JoinBrawlArgs
+    //    {
+    //        Brawler = brawler,
+    //        IndexHint = 0,
+    //    };
+
+    //    if (useSession)
+    //    {
+    //        transaction.FeePayer = sessionWallet.Account.PublicKey;
+    //        joinBrawlAccounts.Signer = sessionWallet.Account.PublicKey;
+    //        joinBrawlAccounts.SessionToken = sessionWallet.SessionTokenPDA;
+    //        var joinBrawlIX = DeathbattleProgram.JoinBrawl(joinBrawlAccounts, jbArgs, AnchorProgramIdPubKey);
+    //        transaction.Add(joinBrawlIX);
+    //        Debug.Log("Sign and send join brawl with session");
+    //        await SendAndConfirmTransaction(sessionWallet, transaction, "Join brawl with session.", isBlocking: false, onSucccess: onSuccess);
+    //    }
+    //    else
+    //    {
+    //        transaction.FeePayer = Web3.Account.PublicKey;
+    //        joinBrawlAccounts.Signer = Web3.Account.PublicKey;
+    //        var chopInstruction = LumberjackProgram.ChopTree(joinBrawlAccounts, levelSeed, transactionCounter, AnchorProgramIdPubKey);
+    //        transaction.Add(chopInstruction);
+    //        Debug.Log("Sign and send init without session");
+    //        await SendAndConfirmTransaction(Web3.Wallet, transaction, "Chop Tree without session.", onSucccess: onSuccess);
+    //    }
+
+    //    if (CurrentCloneLab == null)
+    //    {
+    //        await SubscribeToCloneLabUpdates();
+    //    }
+    //}
 
     public async void ChopTree(bool useSession, Action onSuccess)
     {

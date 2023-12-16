@@ -1,3 +1,4 @@
+using Solana.Unity.Wallet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 public class ProfileController : Window
 {
     public RectTransform noBrawlers;
+    public RectTransform openLobby;
     public GameObject yourBrawlers;
 
     public List<GameObject> gameObjects; // List of GameObjects to layout
@@ -20,7 +22,7 @@ public class ProfileController : Window
     public Transform brawlerContainer;
     public Button labButton1;
     public Button labButton2;
-
+    public Button joinOpenLobbyButton;
 
     public override void Awake()
     {
@@ -33,10 +35,7 @@ public class ProfileController : Window
 
         if (toggle)
         {
-            if (gameObjects.Count > 0)
-            {
-                yourBrawlers.gameObject.SetActive(true);
-            }
+            UpdateProfileView();
         }
         else
         {
@@ -44,16 +43,51 @@ public class ProfileController : Window
         }
     }
 
+    private void UpdateProfileView()
+    {
+        yourBrawlers.gameObject.SetActive(false);
+        openLobby.gameObject.SetActive(false);
+        joinOpenLobbyButton.gameObject.SetActive(false);
+        joinOpenLobbyButton.interactable = false;
+
+        if (gameObjects.Count > 0)
+        {
+            yourBrawlers.gameObject.SetActive(true);
+            joinOpenLobbyButton.interactable = true;
+        }
+
+        if (GameScreen.instance.PendingLobby != null)
+        {
+            openLobby.gameObject.SetActive(true);
+            joinOpenLobbyButton.gameObject.SetActive(true);
+        }
+    }
+
     void Start()
     {
-        GameScreen.instance.BrawlerRetrieved += OnBrawlersUpdated;
+        GameScreen.instance.BrawlersRetrieved += OnBrawlersUpdated;
+        GameScreen.instance.PendingLobbyRetrieved += OnPendingLobbyFound;
 
         labButton1.onClick.AddListener(ClickedOpenLab);
         labButton2.onClick.AddListener(ClickedOpenLab);
+        joinOpenLobbyButton.onClick.AddListener(ClickedJoinLobby);
 
         //PositionGameObjects();
         noBrawlers.gameObject.SetActive(true);
         yourBrawlers.gameObject.SetActive(false);
+    }
+
+    private void ClickedJoinLobby()
+    {
+        if (GameScreen.instance.PendingLobby != null)
+        {
+
+        }
+    }
+
+    private void OnPendingLobbyFound(PublicKey lobbyPubkey)
+    {
+        UpdateProfileView();
     }
 
     private void ClickedOpenLab()
@@ -61,7 +95,7 @@ public class ProfileController : Window
         GameScreen.instance.OpenLab();
     }
 
-    private void OnBrawlersUpdated(BrawlerData brawler)
+    private void OnBrawlersUpdated()
     {
         if (GameScreen.instance.MyBrawlers.Count > 0)
         {
@@ -95,7 +129,6 @@ public class ProfileController : Window
 
     void PositionGameObjects()
     {
-
         if (gameObjects.Count == 1)
         {
             // Center the single GameObject horizontally
@@ -126,6 +159,7 @@ public class ProfileController : Window
                         // Standard grid positioning, only horizontal centering
                         position = new Vector2(gridStart.x + column * horizontalSpacing, startYPosition - row * horizontalSpacing);
                     }
+
                     gameObjects[i].transform.position = new Vector3(position.x, position.y, gameObjects[i].transform.position.z);
                 }
             }
