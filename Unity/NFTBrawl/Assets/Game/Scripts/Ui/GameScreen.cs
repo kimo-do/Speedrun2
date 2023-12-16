@@ -62,6 +62,7 @@ public class GameScreen : MonoBehaviour
     public Solana.Unity.Wallet.PublicKey PendingLobby;
 
     private List<BrawlerData> myBrawlers = new();
+    private bool initialSubcribed;
 
     public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
 
@@ -86,6 +87,9 @@ public class GameScreen : MonoBehaviour
             //SceneManager.LoadScene("LoginScene");
             return;
         }
+
+        PubKeyText.text = Web3.Account.PublicKey.ToString();
+
         StartCoroutine(MonitorSession());
         
         //BrawlAnchorService.OnPlayerDataChanged += OnPlayerDataChanged;
@@ -111,8 +115,11 @@ public class GameScreen : MonoBehaviour
 
         if (!isInitialized)
         {
-            DisableAllScreens();
-            initScreen.gameObject.SetActive(true);
+            if (!initScreen.gameObject.activeInHierarchy)
+            {
+                DisableAllScreens();
+                initScreen.gameObject.SetActive(true);
+            }
         }
         else if (initScreen.gameObject.activeInHierarchy)
         {
@@ -124,9 +131,16 @@ public class GameScreen : MonoBehaviour
         {
             Debug.Log("No profile retrieved, profile is null..");
         }
-        else
+        else if (isInitialized)
         {
             Debug.Log("We have an active profile!");
+
+            if (!initialSubcribed)
+            {
+                initialSubcribed = true;
+                Debug.Log("Subscribing to game updates..");
+                BrawlAnchorService.Instance.SubscribeToUpdates();
+            }
         }
     }
 
@@ -297,7 +311,16 @@ public class GameScreen : MonoBehaviour
 
     public void AttemptCreateBrawler()
     {
+        GraveyardController.Instance.SummonEffect();
 
+        if (BrawlAnchorService.Instance.CurrentProfile != null)
+        {
+            BrawlAnchorService.Instance.CreateBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
+            {
+                // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
+                Debug.Log("Created a brawler!");
+            });
+        }
     }
 
     public void AttemptReviveBrawler()

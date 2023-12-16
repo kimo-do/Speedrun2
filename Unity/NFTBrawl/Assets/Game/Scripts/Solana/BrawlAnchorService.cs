@@ -126,6 +126,13 @@ public class BrawlAnchorService : MonoBehaviour
         //BrawlAnchorService.Instance.IsAnyBlockingProgress = false;
     }
 
+    public async void SubscribeToUpdates()
+    {
+        await SubscribeToCloneLabUpdates();
+        await SubscribeToGraveyardUpdates();
+        await SubscribeToColosseumUpdates();
+    }
+
     private bool conditionMet = false;
 
     private async Task WaitForCondition()
@@ -553,6 +560,57 @@ public class BrawlAnchorService : MonoBehaviour
     //        await SubscribeToCloneLabUpdates();
     //    }
     //}
+
+    public async void CreateBrawler(bool useSession, Action onSuccess)
+    {
+        if (!Instance.IsSessionValid())
+        {
+            await Instance.UpdateSessionValid();
+            ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
+            return;
+        }
+
+        var transaction = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash(maxSeconds: 15)
+        };
+
+        //TODO: Blockiosaurus, please check these accounts, I'm getting a nullref in the DeathBattleProgram when calling
+
+        CreateCloneAccounts createCloneAccounts = new CreateCloneAccounts
+        {
+            Profile = ProfilePDA,
+            Payer = Web3.Account.PublicKey,
+            CloneLab = CloneLabPDA,
+            SystemProgram = SystemProgram.ProgramIdKey
+        };
+
+        if (useSession)
+        {
+            transaction.FeePayer = sessionWallet.Account.PublicKey;
+            createCloneAccounts.Payer = sessionWallet.Account.PublicKey;
+            var createCloneIX = DeathbattleProgram.CreateClone(createCloneAccounts, AnchorProgramIdPubKey);
+            transaction.Add(createCloneIX);
+            Debug.Log("Sign and send create clone with session");
+            await SendAndConfirmTransaction(sessionWallet, transaction, "Create clone with session.", isBlocking: false, onSucccess: onSuccess);
+        }
+        else
+        {
+            transaction.FeePayer = Web3.Account.PublicKey;
+            createCloneAccounts.Payer = Web3.Account.PublicKey;
+            var createCloneIX = DeathbattleProgram.CreateClone(createCloneAccounts, AnchorProgramIdPubKey);
+            transaction.Add(createCloneIX);
+            Debug.Log("Sign and send create clone without session");
+            await SendAndConfirmTransaction(Web3.Wallet, transaction, "Create clone without session.", onSucccess: onSuccess);
+        }
+
+        //if (CurrentCloneLab == null)
+        //{
+        //    await SubscribeToCloneLabUpdates();
+        //}
+    }
 
     public async void ChopTree(bool useSession, Action onSuccess)
     {
