@@ -25,4 +25,8 @@ pub enum BrawlError {
     /// 1004 - Invalid Owner.
     #[msg("Invalid Owner of the Brawler.")]
     InvalidOwner,
+
+    /// 1005 - Numerical overflow error.
+    #[msg("Numerical overflow error.")]
+    NumericalOverflowError,
 }

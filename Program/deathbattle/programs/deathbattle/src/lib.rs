@@ -2,12 +2,14 @@ pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
+pub mod utils;
 
 use anchor_lang::prelude::*;
 
 use crate::instructions::*;
 pub use constants::*;
 pub use state::*;
+pub use utils::*;
 
 declare_id!("BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ");
 

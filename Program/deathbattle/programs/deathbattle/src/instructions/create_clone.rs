@@ -1,6 +1,7 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program};
+use strum::IntoEnumIterator;
 
-use crate::{Brawler, CloneLab, Profile};
+use crate::{rand_choice, Brawler, BrawlerType, CharacterType, CloneLab, Profile};
 
 // #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, PartialEq)]
 // pub struct CreateCloneArgs {
@@ -40,6 +41,8 @@ pub struct CreateClone<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
+    /// CHECK: Checked in the instruction.
+    pub slot_hashes: UncheckedAccount<'info>,
 }
 
 impl<'info> CreateClone<'info> {
@@ -51,7 +54,20 @@ impl<'info> CreateClone<'info> {
             .brawlers
             .push(ctx.accounts.brawler.key());
 
+        ctx.accounts.brawler.owner = ctx.accounts.payer.key();
         ctx.accounts.brawler.name = ctx.accounts.profile.username.clone();
+
+        assert!(*ctx.accounts.slot_hashes.key == solana_program::sysvar::slot_hashes::ID);
+
+        ctx.accounts.brawler.character_type = rand_choice(
+            &CharacterType::iter().collect(),
+            &ctx.accounts.slot_hashes.to_account_info(),
+        )?;
+
+        ctx.accounts.brawler.brawler_type = rand_choice(
+            &BrawlerType::iter().collect(),
+            &ctx.accounts.slot_hashes.to_account_info(),
+        )?;
 
         Ok(())
     }

@@ -95,9 +95,12 @@ describe("deathbattle", () => {
         brawler: brawlerAddress[0],
         profile: profileAddress[0],
         payer: player.publicKey,
+        slotHashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
       })
       .signers([player])
       .rpc({skipPreflight: true});
+    const brawler = await program.account.brawler.fetch(brawlerAddress[0]);
+    console.log("Brawler:", brawler);
 
     await printState(program, cloneLabAddress[0], colosseumAddress[0], graveyardAddress[0]);
   });

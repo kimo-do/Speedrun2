@@ -163,6 +163,11 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "slotHashes",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -307,6 +312,24 @@
               "The owner of the clone."
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "characterType",
+            "docs": [
+              "The character type of the clone."
+            ],
+            "type": {
+              "defined": "CharacterType"
+            }
+          },
+          {
+            "name": "brawlerType",
+            "docs": [
+              "The brawler type of the clone."
+            ],
+            "type": {
+              "defined": "BrawlerType"
+            }
           },
           {
             "name": "name",
@@ -504,6 +527,55 @@
           }
         ]
       }
+    },
+    {
+      "name": "CharacterType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Default"
+          },
+          {
+            "name": "Male1"
+          },
+          {
+            "name": "Female1"
+          },
+          {
+            "name": "Bonki"
+          },
+          {
+            "name": "SolBlaze"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BrawlerType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Saber"
+          },
+          {
+            "name": "Pistol"
+          },
+          {
+            "name": "Hack"
+          },
+          {
+            "name": "Katana"
+          },
+          {
+            "name": "Virus"
+          },
+          {
+            "name": "Laser"
+          }
+        ]
+      }
     }
   ],
   "errors": [
@@ -536,6 +608,11 @@
       "code": 6005,
       "name": "InvalidOwner",
       "msg": "Invalid Owner of the Brawler."
+    },
+    {
+      "code": 6006,
+      "name": "NumericalOverflowError",
+      "msg": "Numerical overflow error."
     }
   ],
   "metadata": {
