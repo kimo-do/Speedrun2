@@ -188,12 +188,12 @@ public class LoginScreen : MonoBehaviour
 
     private async void OnEditorLoginClicked()
     {
-        BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
+        //BrawlAnchorService.Instance.IsAnyBlockingProgress = true;
 
         var newMnemonic = new Mnemonic(WordList.English, WordCount.Twelve);
 
         // Dont use this one for production. Its only ment for editor login
-        var account = await Web3.Instance.LoginInGameWallet("1234") ??
-                      await Web3.Instance.CreateAccount(newMnemonic.ToString(), "1234");
+        var account = await Web3.Instance.LoginInGameWallet("12345") ??
+                      await Web3.Instance.CreateAccount(newMnemonic.ToString(), "12345");
     }
 }
