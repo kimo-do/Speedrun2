@@ -116,8 +116,11 @@ public class BrawlController : Window
         {
             if (i < this.crowdDataList.Count)
             {
-                crowd[i].GetComponent<BrawlerCharacter>().SetBrawlerData(this.crowdDataList[i]);
-                crowd[i].SetActive(true);
+                if (this.crowdDataList[i] != null)
+                {
+                    crowd[i].GetComponent<BrawlerCharacter>().SetBrawlerData(this.crowdDataList[i]);
+                    crowd[i].SetActive(true);
+                }
             }
         }
     }

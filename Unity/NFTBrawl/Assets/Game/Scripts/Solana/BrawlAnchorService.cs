@@ -259,7 +259,7 @@ public class BrawlAnchorService : MonoBehaviour
 
         try
         {
-            cloneData = await anchorClient.GetCloneLabAsync(CloneLabPDA, Commitment.Confirmed);
+            cloneData = await anchorClient.GetCloneLabAsync(CloneLabPDA, Commitment.Finalized);
             if (cloneData.ParsedResult != null)
             {
                 CurrentCloneLab = cloneData.ParsedResult;
@@ -276,7 +276,7 @@ public class BrawlAnchorService : MonoBehaviour
             await anchorClient.SubscribeCloneLabAsync(CloneLabPDA, (state, value, gameData) =>
             {
                 OnReceivedCloneLabUpdate(gameData);
-            }, Commitment.Processed);
+            }, Commitment.Finalized);
         }
     }
 
@@ -393,7 +393,7 @@ public class BrawlAnchorService : MonoBehaviour
         OnColosseumChanged?.Invoke(colosseum);
     }
 
-    private async Task<List<Brawler>> FetchAllReadyBrawlers(CloneLab cloneLab)
+    public async Task<List<Brawler>> FetchAllReadyBrawlers(CloneLab cloneLab)
     {
         List<Brawler> readyBrawlers = new List<Brawler>();
         foreach (var brawler in cloneLab.Brawlers)
@@ -406,6 +406,27 @@ public class BrawlAnchorService : MonoBehaviour
         }
 
         return readyBrawlers;
+    }
+
+    public async Task<Brawler> FetchBrawler(PublicKey brawler)
+    {
+        Brawler foundBrawler = null;
+
+        var brawlerData = await anchorClient.GetBrawlerAsync(brawler, Commitment.Processed);
+
+        if (brawlerData.ParsedResult != null)
+        {
+            Debug.Log($"Fetched brawler: {brawler.ToString()}");
+        }
+
+        if (brawlerData.ParsedResult != null && brawlerData.ParsedResult.Owner == Web3.Account.PublicKey)
+        {
+            Debug.Log($"I am the owner: {brawler.ToString()}");
+
+            foundBrawler = brawlerData.ParsedResult;
+        }
+
+        return foundBrawler;
     }
 
     public async Task InitAccounts(bool useSession, string username)

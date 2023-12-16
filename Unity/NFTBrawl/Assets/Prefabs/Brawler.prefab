@@ -218,6 +218,9 @@ MonoBehaviour:
   - characterType: 3
     controller: {fileID: 22100000, guid: 4f5d280aa6df9f94480cf3db1516880f, type: 2}
     customIdleSpeed: 5
+  - characterType: 4
+    controller: {fileID: 22100000, guid: 50410b16507e2d74aa0078c25559aede, type: 2}
+    customIdleSpeed: 1
   abilityAnimator: {fileID: 5618935853441750409}
 --- !u!1 &6898899360993754351
 GameObject:

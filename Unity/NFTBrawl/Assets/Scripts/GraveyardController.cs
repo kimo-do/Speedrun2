@@ -55,6 +55,10 @@ public class GraveyardController : Window
     {
         base.Toggle(toggle);
 
+        cloneCapsuleAnimator.SetBool("Clone", false);
+        cloneCapsuleAnimator.SetTrigger("Reset");
+        revealBrawlerAnimator.SetTrigger("Reset");
+
         if (toggle)
         {
             cloneVFX.SetActive(true);

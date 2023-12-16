@@ -105,6 +105,10 @@ public class ProfileController : Window
             foreach (BrawlerData myBrawler in GameScreen.instance.MyBrawlers)
             {
                 GameObject newBrawler = Instantiate(GameScreen.instance.brawlerPfb, brawlerContainer);
+                if (myBrawler != null)
+                {
+                    newBrawler.GetComponent<BrawlerCharacter>().SetBrawlerData(myBrawler);
+                }
                 gameObjects.Add(newBrawler);
             }
 

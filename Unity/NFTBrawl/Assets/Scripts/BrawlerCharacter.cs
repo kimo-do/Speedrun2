@@ -29,12 +29,21 @@ public class BrawlerCharacter : MonoBehaviour
 
     public void SetBrawlerData(BrawlerData brawlerData)
     {
+        animator = GetComponent<Animator>();
+
         myBrawlerData = brawlerData;
         myVisualBrawler = visualBrawlers.FirstOrDefault(b => b.characterType == brawlerData.characterType);
 
-        if (myVisualBrawler.controller != null)
+        if (myVisualBrawler != null)
         {
-            animator.runtimeAnimatorController = myVisualBrawler.controller;
+            if (myVisualBrawler.controller != null)
+            {
+                animator.runtimeAnimatorController = myVisualBrawler.controller;
+            }
+        }
+        else
+        {
+            Debug.Log($"NO BRAWLER FOR TYPE : {brawlerData.characterType}, {brawlerData.brawlerType}");
         }
 
         animator.SetFloat("idlespeed", myVisualBrawler.customIdleSpeed);

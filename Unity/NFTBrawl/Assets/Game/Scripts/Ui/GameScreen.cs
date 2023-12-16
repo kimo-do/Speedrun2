@@ -70,6 +70,7 @@ public class GameScreen : MonoBehaviour
     public Solana.Unity.Wallet.PublicKey PendingLobby;
 
     private List<BrawlerData> myBrawlers = new();
+    private List<PublicKey> myBrawlersPubKeys = new();
     private bool initialSubcribed;
     private Coroutine errorRoutine;
 
@@ -297,8 +298,54 @@ public class GameScreen : MonoBehaviour
         if (currentCloneLab != null)
         {
             Debug.Log($"Received clonelab update, brawlers: {currentCloneLab.Brawlers.Length}, number: {currentCloneLab.NumBrawlers}");
-            BrawlersRetrieved?.Invoke();
+
+            if (currentCloneLab.Brawlers.Length > 0)
+            {
+                Debug.Log($"Attempting to fetch all brawlers..");
+                FetchAllNewBrawlers(currentCloneLab.Brawlers);
+            }
         }
+    }
+
+    private async void FetchAllNewBrawlers(PublicKey[] newBrawlers)
+    {
+        foreach (var brawl in currentCloneLab.Brawlers)
+        {
+            if (!myBrawlersPubKeys.Contains(brawl))
+            {
+                myBrawlersPubKeys.Add(brawl);
+
+                Brawler fetchedBrawler = await BrawlAnchorService.Instance.FetchBrawler(brawl);
+
+                if (fetchedBrawler != null)
+                {
+                    int brawlIntType = (int)fetchedBrawler.BrawlerType;
+                    int charIntType = (int)fetchedBrawler.CharacterType;
+                    string brawlName = fetchedBrawler.Name;
+
+                    BrawlerData brawlerData = new BrawlerData()
+                    {
+                        brawlerType = (BrawlerData.BrawlerType)brawlIntType,
+                        characterType = (BrawlerData.CharacterType)charIntType,
+                        username = fetchedBrawler.Name,
+                    };
+
+                    myBrawlers.Add(brawlerData);
+                }
+            }
+        }
+
+        Debug.Log($"Finished fetching all brawlers: {MyBrawlers.Count}");
+
+        if (MyBrawlers.Count > 0)
+        {
+            Debug.Log("MY BRAWLER:");
+            Debug.Log($"-- {MyBrawlers[0].characterType}");
+            Debug.Log($"-- {MyBrawlers[0].brawlerType}");
+            Debug.Log($"-- {MyBrawlers[0].username}");
+        }
+
+        BrawlersRetrieved?.Invoke();
     }
 
     private void UpdateContent()
