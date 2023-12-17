@@ -224,6 +224,7 @@ public class ProfileController : Window
             Debug.Log($"Fetching all brawlers..");
 
             GameScreen.instance.ActiveGameWinner = activeBrawl.Winner;
+            GameScreen.instance.ActivePlayingBrawl = brawl;
 
             List<Brawler> brawlers = await BrawlAnchorService.Instance.FetchAllBrawlersFromBrawl(activeBrawl);
 

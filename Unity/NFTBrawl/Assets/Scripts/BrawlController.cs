@@ -221,8 +221,18 @@ public class BrawlController : Window
             ShowBattleResult(false);
         }
 
+        if (GameScreen.instance.ActivePlayingBrawl != null)
+        {
+            BrawlAnchorService.Instance.ClearEndedBrawl(true, OnEndBrawl, GameScreen.instance.ActivePlayingBrawl, GameScreen.instance.ActiveGameWinner);
+        }
+
         GameScreen.instance.HoldWalletUpdates = false;
         SolBalanceWidget.instance.ShowPendingChanges();
+    }
+
+    private void OnEndBrawl()
+    {
+
     }
 
     IEnumerator autoPlayFight()
