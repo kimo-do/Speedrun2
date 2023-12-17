@@ -885,7 +885,7 @@ public class BrawlAnchorService : MonoBehaviour
             () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
     }
 
-    public async void ClearEndedBrawl(bool useSession, Action onSuccess, PublicKey brawlPDA)
+    public async void ClearEndedBrawl(bool useSession, Action onSuccess, PublicKey brawlPDA, PublicKey winner)
     {
         if (!Instance.IsSessionValid())
         {
@@ -907,8 +907,10 @@ public class BrawlAnchorService : MonoBehaviour
 
         ClearEndedBrawlAccounts cebAccounts = new ClearEndedBrawlAccounts
         {
+            CloneLab = CloneLabPDA,
             Colosseum = ColosseumPDA,
             Brawl = brawlPDA,
+            Winner = winner,
             Payer = Web3.Account.PublicKey,
             Authority = AdminPubkey,
             SystemProgram = SystemProgram.ProgramIdKey,
