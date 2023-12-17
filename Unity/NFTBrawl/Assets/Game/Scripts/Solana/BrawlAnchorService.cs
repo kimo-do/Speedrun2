@@ -610,7 +610,7 @@ public class BrawlAnchorService : MonoBehaviour
         Debug.Log("Session closed");
     }
 
-    public async void StartBrawl()
+    public async void StartBrawl(Action onBrawlCreated)
     {
         var transaction = new Transaction()
         {
@@ -634,7 +634,7 @@ public class BrawlAnchorService : MonoBehaviour
         var startBrawlIX = DeathbattleProgram.StartBrawl(startBrawlAccounts, AnchorProgramIdPubKey);
         transaction.Add(startBrawlIX);
         Debug.Log("Sign and send start brawl");
-        await SendAndConfirmTransaction(Web3.Wallet, transaction, "Start brawl.");
+        await SendAndConfirmTransaction(Web3.Wallet, transaction, "Start brawl.", onBrawlCreated);
     }
 
     public async void JoinBrawl(PublicKey brawlPDA, PublicKey brawler)

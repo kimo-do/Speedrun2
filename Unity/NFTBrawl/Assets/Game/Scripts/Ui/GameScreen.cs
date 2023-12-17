@@ -76,6 +76,7 @@ public class GameScreen : MonoBehaviour
 
     private List<BrawlerData> activeGameBrawlers = new();
     private PublicKey activeGameWinner;
+    private PublicKey activePlayingBrawl;
 
     private List<PublicKey> pendingJoinableBrawls = new();
     private List<PublicKey> readyToStartBrawls = new();
@@ -94,6 +95,7 @@ public class GameScreen : MonoBehaviour
     public List<PublicKey> ReadyToStartBrawls { get => readyToStartBrawls; set => readyToStartBrawls = value; }
     public List<PublicKey> EndedBrawls { get => endedBrawls; set => endedBrawls = value; }
     public List<PublicKey> MyBrawlersPubKeys { get => myBrawlersPubKeys; set => myBrawlersPubKeys = value; }
+    public PublicKey ActivePlayingBrawl { get => activePlayingBrawl; set => activePlayingBrawl = value; }
 
     // The PDAs
     public PublicKey BrawlerPDA;

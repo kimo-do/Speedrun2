@@ -106,7 +106,12 @@ public class ProfileController : Window
 
     private void ClickedCreateBrawl()
     {
-        BrawlAnchorService.Instance.StartBrawl();
+        BrawlAnchorService.Instance.StartBrawl(OnBrawlCreated);
+    }
+
+    private void OnBrawlCreated()
+    {
+
     }
 
     private void ClickedJoinLobby()
@@ -117,11 +122,11 @@ public class ProfileController : Window
 
             if (GameScreen.instance.selectedCharacter != null)
             {
-                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.ownerKey;
+                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.brawlerKey;
             }
             else
             {
-                myBrawler = GameScreen.instance.MyBrawlers[0].ownerKey;
+                myBrawler = GameScreen.instance.MyBrawlers[0].brawlerKey;
             }
 
             if (myBrawler != null)
@@ -219,6 +224,7 @@ public class ProfileController : Window
             Debug.Log($"Fetching all brawlers..");
 
             GameScreen.instance.ActiveGameWinner = activeBrawl.Winner;
+            GameScreen.instance.ActivePlayingBrawl = brawl;
 
             List<Brawler> brawlers = await BrawlAnchorService.Instance.FetchAllBrawlersFromBrawl(activeBrawl);
 
