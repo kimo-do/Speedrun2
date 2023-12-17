@@ -665,7 +665,7 @@ public class GameScreen : MonoBehaviour
     {
         if (BrawlAnchorService.Instance.CurrentProfile != null)
         {
-            if (solBalance >= 1.0)
+            if (solBalance >= 0.1)
             {
                 GraveyardController.Instance.SummonEffect();
 
