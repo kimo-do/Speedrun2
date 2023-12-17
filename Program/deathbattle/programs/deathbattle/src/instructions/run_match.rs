@@ -41,19 +41,22 @@ pub struct RunMatch<'info> {
 impl<'info> RunMatch<'info> {
     pub fn handler(ctx: Context<RunMatch>) -> Result<()> {
         assert!(*ctx.accounts.slot_hashes.key == solana_program::sysvar::slot_hashes::ID);
-        let mut brawlers = vec![];
-        let queue = ctx.accounts.brawl.queue.clone();
-        for brawler in queue.iter() {
-            for account in ctx.remaining_accounts.iter() {
-                if brawler == account.key {
-                    brawlers.push(ctx.accounts.brawl.queue.pop().unwrap());
-                }
-            }
-        }
 
-        if !queue.is_empty() {
-            err!(BrawlError::MissingBrawlerAccounts)?;
-        }
+        // let mut brawlers = vec![];
+        // let queue = ctx.accounts.brawl.queue.clone();
+        // for brawler in queue.iter() {
+        //     for account in ctx.remaining_accounts.iter() {
+        //         if brawler == account.key {
+        //             brawlers.push(ctx.accounts.brawl.queue.pop().unwrap());
+        //         }
+        //     }
+        // }
+
+        // if !queue.is_empty() {
+        //     err!(BrawlError::MissingBrawlerAccounts)?;
+        // }
+
+        let mut brawlers = ctx.accounts.brawl.queue.clone();
 
         match rand_choice(&brawlers, &ctx.accounts.slot_hashes.to_account_info()) {
             Ok(winner) => {

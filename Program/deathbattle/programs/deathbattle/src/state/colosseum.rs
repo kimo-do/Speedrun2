@@ -25,6 +25,9 @@ impl Colosseum {
 
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
-        Self::INIT_LEN + (32 * self.pending_brawls.len()) + (32 * self.active_brawls.len())
+        Self::INIT_LEN
+            + (32 * self.pending_brawls.len())
+            + (32 * self.active_brawls.len())
+            + (32 * self.ended_brawls.len())
     }
 }
