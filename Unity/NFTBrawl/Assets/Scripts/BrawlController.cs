@@ -1,3 +1,4 @@
+using Game.Scripts.Ui;
 using Solana.Unity.Wallet;
 using System;
 using System.Collections;
@@ -219,6 +220,9 @@ public class BrawlController : Window
         {
             ShowBattleResult(false);
         }
+
+        GameScreen.instance.HoldWalletUpdates = false;
+        SolBalanceWidget.instance.ShowPendingChanges();
     }
 
     IEnumerator autoPlayFight()

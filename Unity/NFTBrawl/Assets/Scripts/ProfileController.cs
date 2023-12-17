@@ -13,6 +13,7 @@ public class ProfileController : Window
     public RectTransform noBrawlers;
     public RectTransform openLobby;
     public GameObject yourBrawlers;
+    public GameObject yourBrawlersContainer;
     public TMP_Text infoLabel;
 
     public List<GameObject> gameObjects; // List of GameObjects to layout
@@ -59,10 +60,13 @@ public class ProfileController : Window
         joinOpenLobbyButton.gameObject.SetActive(false);
         joinOpenLobbyButton.interactable = false;
         createNewBrawl.gameObject.SetActive(false);
+        createNewBrawl.interactable = false;    
+
 
         if (GameScreen.instance.MyBrawlers.Count > 0)
         {
             joinOpenLobbyButton.interactable = true;
+            createNewBrawl.interactable = true;
         }
 
         if (GameScreen.instance.PendingLobby != null)
@@ -116,6 +120,7 @@ public class ProfileController : Window
 
             if (myBrawler != null)
             {
+                GameScreen.instance.HoldWalletUpdates = true;
                 AttemptedJoinLobby = GameScreen.instance.PendingLobby;
                 BrawlAnchorService.Instance.JoinBrawl(GameScreen.instance.PendingLobby, myBrawler);
             }
@@ -209,6 +214,8 @@ public class ProfileController : Window
                 Destroy(brawlerShown);
             }
 
+            gameObjects.Clear();
+
             foreach (BrawlerData myBrawler in GameScreen.instance.MyBrawlers)
             {
                 GameObject newBrawler = Instantiate(GameScreen.instance.brawlerPfb, brawlerContainer);
@@ -221,8 +228,14 @@ public class ProfileController : Window
 
             PositionGameObjects();
 
-            noBrawlers.gameObject.SetActive(false);
-            yourBrawlers.gameObject.SetActive(true);
+            if (isShowingProfile)
+            {
+                noBrawlers.gameObject.SetActive(false);
+                yourBrawlers.gameObject.SetActive(true);
+
+                joinOpenLobbyButton.interactable = true;
+                createNewBrawl.interactable = true;
+            }
         }
     }
 

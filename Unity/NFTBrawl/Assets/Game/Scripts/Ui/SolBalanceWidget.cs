@@ -13,6 +13,7 @@ namespace Game.Scripts.Ui
     /// </summary>
     public class SolBalanceWidget : MonoBehaviour
     {
+        public static SolBalanceWidget instance;
         public TextMeshProUGUI SolBalance;
         public TextMeshProUGUI SolChangeText;
         public TextMeshProUGUI PublicKey;
@@ -22,9 +23,13 @@ namespace Game.Scripts.Ui
         private Coroutine disableSolChangeCoroutine;
         private double currentLamports;
         private AudioSource audioSource;
+        private bool hasPendingBalanceChange;
+        private double pendingChange;
+        private double pendingTotal;
 
         private void Awake()
         {
+            instance = this;
             audioSource = GetComponent<AudioSource>();
 
             if (CopyAddressButton)
@@ -66,18 +71,23 @@ namespace Game.Scripts.Ui
                 lamportsChange += balanceChange;
                 if (balanceChange > 0)
                 {
+                    if (GameScreen.instance != null)
+                    {
+                        if (GameScreen.instance.HoldWalletUpdates)
+                        {
+                            hasPendingBalanceChange = true;
+                            pendingChange = lamportsChange;
+                            pendingTotal = newLamports;
+                            return;
+                        }
+                    }
+
                     if (disableSolChangeCoroutine != null)
                     {
                         StopCoroutine(disableSolChangeCoroutine);
                     }
 
-                    SolChangeText.text = "<color=green>+" + lamportsChange.ToString("F2") + "</color> ";
-                    disableSolChangeCoroutine = StartCoroutine(DisableSolChangeDelayed());
-
-                    if (audioSource != null)
-                    {
-                        audioSource.Play();
-                    }
+                    ShowGain();
                 }
                 else
                 {
@@ -99,6 +109,29 @@ namespace Game.Scripts.Ui
             else
             {
                 currentLamports = newLamports;
+                UpdateContent();
+            }
+        }
+
+        private void ShowGain()
+        {
+            SolChangeText.text = "<color=green>+" + lamportsChange.ToString("F2") + "</color> ";
+            disableSolChangeCoroutine = StartCoroutine(DisableSolChangeDelayed());
+
+            if (audioSource != null)
+            {
+                audioSource.Play();
+            }
+        }
+
+        public void ShowPendingChanges()
+        {
+            if (hasPendingBalanceChange)
+            {
+                hasPendingBalanceChange = false;
+                lamportsChange = pendingChange;
+                currentLamports = pendingTotal;
+                ShowGain();
                 UpdateContent();
             }
         }

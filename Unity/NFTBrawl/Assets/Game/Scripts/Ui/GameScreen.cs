@@ -39,7 +39,7 @@ public class GameScreen : MonoBehaviour
     public Button NftsButton;
     public Button InitGameDataButton;
     public Button initProfileButton;
-
+    public Button copyWalletAddy;
 
     public TextMeshProUGUI EnergyAmountText;
     public TextMeshProUGUI WoodAmountText;
@@ -86,6 +86,7 @@ public class GameScreen : MonoBehaviour
     public PublicKey ActiveGameWinner { get => activeGameWinner; set => activeGameWinner = value; }
 
     public bool IsPlayingOutBattle { get; set; }
+    public bool HoldWalletUpdates { get; set; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
@@ -93,6 +94,19 @@ public class GameScreen : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    public void CopyWallet()
+    {
+        if (Web3.Account != null)
+        {
+            GUIUtility.systemCopyBuffer = Web3.Account.PublicKey.ToString();
+            ShowError("Wallet copied!", 2f);
+        }
+        else
+        {
+            ShowError("Something went wrong, no account found.", 2f);
+        }
     }
 
     public void ShowError(string message, float duration)
@@ -130,6 +144,7 @@ public class GameScreen : MonoBehaviour
         //NftsButton.onClick.AddListener(OnNftsButtonClicked);
         InitGameDataButton.onClick.AddListener(OnInitGameDataButtonClicked);
         initProfileButton.onClick.AddListener(OnInitGameDataButtonClicked);
+        copyWalletAddy.onClick.AddListener(CopyWallet);
         //CharacterStartPosition = ChuckWoodSessionButton.transform.localPosition;
         // In case we are not logged in yet load the LoginScene
         if (Web3.Account == null)
@@ -223,13 +238,23 @@ public class GameScreen : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.L))
-        {
-            AudioManager.instance.PlayBattleMusic();
-            DisableAllScreens();
-            brawlScreen.Toggle(true);
-            brawlScreen.PlayOutFights(MyBrawlers.Take(8).ToList(), MyBrawlers[UnityEngine.Random.Range(0, MyBrawlers.Count)].brawlerKey, MyBrawlers[0].brawlerKey);
-        }
+        //if (Input.GetKeyUp(KeyCode.L))
+        //{
+        //    AudioManager.instance.PlayBattleMusic();
+        //    DisableAllScreens();
+        //    brawlScreen.Toggle(true);
+
+        //    MyBrawlers[0].username = "DaveR";
+        //    MyBrawlers[1].username = "Kimosabe";
+        //    MyBrawlers[2].username = "Acammm";
+        //    MyBrawlers[3].username = "Blockiosaurus";
+        //    MyBrawlers[4].username = "Alfie";
+        //    MyBrawlers[5].username = "Eidlucie";
+        //    MyBrawlers[6].username = "Anatoly";
+        //    MyBrawlers[7].username = "Raj";
+
+        //    brawlScreen.PlayOutFights(MyBrawlers.Take(8).ToList(), MyBrawlers[UnityEngine.Random.Range(0, MyBrawlers.Count)].brawlerKey, MyBrawlers[0].brawlerKey);
+        //}
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -275,6 +300,7 @@ public class GameScreen : MonoBehaviour
 
     public void OpenProfile()
     {
+        HoldWalletUpdates = false;
         IsPlayingOutBattle = false;
         DisableAllScreens();
         profileScreen.Toggle(true);
