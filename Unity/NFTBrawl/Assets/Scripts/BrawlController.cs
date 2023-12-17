@@ -45,7 +45,7 @@ public class BrawlController : Window
     private List<BrawlerData> crowdDataList;
     private Coroutine playoutFightsRoutine;
 
-    private Dictionary<BrawlerData, bool> allBrawlersStatus = new();
+    private Queue<BrawlerData> brawlerLineup = new();
     private PublicKey winner;
     private PublicKey myBrawlerKey;
 
@@ -115,12 +115,23 @@ public class BrawlController : Window
         this.winner = winner;
         this.myBrawlerKey = myBrawler;
 
-        allBrawlersStatus = new();
+        brawlerLineup = new();
+
+        BrawlerData winnerData = null;
 
         foreach (var brawler in allBrawlers)
         {
-            allBrawlersStatus[brawler] = false;
+            if (brawler.publicKey != winner)
+            {
+                brawlerLineup.Enqueue(brawler);
+            }
+            else
+            {
+                winnerData = brawler;
+            }
         }
+
+        brawlerLineup.Enqueue(winnerData);
 
         if (playoutFightsRoutine != null)
         {
@@ -134,29 +145,25 @@ public class BrawlController : Window
 
     IEnumerator c_PlayoutFights()
     {
-        InitCrowd(allBrawlersStatus.Keys.ToList());
+        InitCrowd(brawlerLineup.ToList());
 
         yield return new WaitForSeconds(1f);
 
-        List<KeyValuePair<BrawlerData, bool>> twoFighers = allBrawlersStatus.Where(a => a.Value == false).ToList();
-
-        while(twoFighers.Count > 1)
+        while(brawlerLineup.Count > 1)
         {
             readyForFight = false;
 
-            allBrawlersStatus[twoFighers[0].Key] = true;
-            allBrawlersStatus[twoFighers[1].Key] = true;
+            BrawlerData fighter1 = brawlerLineup.Dequeue();
+            BrawlerData fighter2 = brawlerLineup.Dequeue();
 
-            RemoveFromCrowd(twoFighers[0].Key);
-            RemoveFromCrowd(twoFighers[1].Key);
+            RemoveFromCrowd(fighter1);
+            RemoveFromCrowd(fighter2);
 
-            InitFightSequence(twoFighers[0].Key, twoFighers[1].Key);
+            InitFightSequence(fighter1, fighter2);
 
             yield return new WaitUntil(() => readyForFight == true);
 
             yield return StartCoroutine(autoPlayFight());
-
-            twoFighers = allBrawlersStatus.Where(a => a.Value == false).ToList();
         }
 
         // All fights finished
