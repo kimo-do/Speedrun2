@@ -253,6 +253,11 @@
           "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "slotHashes",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -279,6 +284,13 @@
             "type": {
               "vec": "publicKey"
             }
+          },
+          {
+            "name": "winner",
+            "docs": [
+              "The winner"
+            ],
+            "type": "publicKey"
           },
           {
             "name": "matches",
@@ -613,9 +625,11 @@
       "code": 6006,
       "name": "NumericalOverflowError",
       "msg": "Numerical overflow error."
+    },
+    {
+      "code": 6007,
+      "name": "WinnerNotDetermined",
+      "msg": "Winner not determined"
     }
-  ],
-  "metadata": {
-    "address": "BRAWLHsgvJBQGx4EzNuqKpbbv8q3LhcYbL1bHqbgVtaJ"
-  }
+  ]
 }
