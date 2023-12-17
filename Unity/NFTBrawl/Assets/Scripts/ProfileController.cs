@@ -67,11 +67,18 @@ public class ProfileController : Window
 
         if (GameScreen.instance.MyBrawlers.Count > 0)
         {
-            joinOpenLobbyButton.interactable = true;
+            if (AttemptedJoinLobby == null)
+            {
+                joinOpenLobbyButton.interactable = true;
+            }
             createNewBrawl.interactable = true;
         }
 
-        if (GameScreen.instance.PendingJoinableBrawls.Count > 0)
+        if (AttemptedJoinLobby != null)
+        {
+            infoLabel.text = "Waiting for other players..";
+        }
+        else if (GameScreen.instance.PendingJoinableBrawls.Count > 0)
         {
             openLobby.gameObject.SetActive(true);
             joinOpenLobbyButton.gameObject.SetActive(true);
@@ -134,6 +141,8 @@ public class ProfileController : Window
                 GameScreen.instance.HoldWalletUpdates = true;
                 AttemptedJoinLobby = GameScreen.instance.PendingJoinableBrawls[0];
                 BrawlAnchorService.Instance.JoinBrawl(AttemptedJoinLobby, myBrawler);
+                infoLabel.text = "Waiting for other players..";
+                joinOpenLobbyButton.interactable = false;
             }
             else
             {
@@ -162,6 +171,14 @@ public class ProfileController : Window
 
             foreach (var readyBrawl in GameScreen.instance.ReadyToStartBrawls)
             {
+                if (AttemptedJoinLobby != null)
+                {
+                    if (AttemptedJoinLobby.ToString() == readyBrawl.ToString())
+                    {
+                        AttemptedJoinLobby = null;
+                    }
+                }
+            
                 BrawlAnchorService.Instance.RunMatch(true, OnRunMatch, readyBrawl);
             }
         }
@@ -296,7 +313,10 @@ public class ProfileController : Window
                 noBrawlers.gameObject.SetActive(false);
                 yourBrawlers.gameObject.SetActive(true);
 
-                joinOpenLobbyButton.interactable = true;
+                if (AttemptedJoinLobby == null)
+                {
+                    joinOpenLobbyButton.interactable = true;
+                }
                 createNewBrawl.interactable = true;
             }
         }
