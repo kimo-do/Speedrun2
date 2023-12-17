@@ -936,7 +936,7 @@ public class BrawlAnchorService : MonoBehaviour
         }
 
         bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "revive_clone",
-            () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
+            () => { Debug.Log("Clear Ended Brawl was successful"); }, s => { Debug.LogError("Clear Ended Brawl was not successful"); });
     }
 
     public async void ChopTree(bool useSession, Action onSuccess)
