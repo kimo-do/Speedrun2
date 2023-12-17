@@ -357,6 +357,40 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "clearEndedBrawl",
+      "accounts": [
+        {
+          "name": "colosseum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "brawl",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The brawl to remove"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [

@@ -57,4 +57,8 @@ pub mod deathbattle {
     pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
         CloseAccount::handler(ctx)
     }
+
+    pub fn clear_ended_brawl(ctx: Context<ClearEndedBrawl>) -> Result<()> {
+        ClearEndedBrawl::handler(ctx)
+    }
 }
