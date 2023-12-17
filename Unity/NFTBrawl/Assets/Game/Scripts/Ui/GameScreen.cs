@@ -18,6 +18,7 @@ using Solana.Unity.Programs;
 using Solana.Unity.Wallet;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 /// <summary>
 /// This is the screen which handles the interaction with the anchor program.
@@ -65,17 +66,24 @@ public class GameScreen : MonoBehaviour
 
     public Action<int> FalledBrawlersUpdated;
     public Action BrawlersRetrieved;
-    public Action<LobbyData> PendingLobbiesRetrieved;
+    //public Action<LobbyData> PendingLobbiesRetrieved;
     public Action<Solana.Unity.Wallet.PublicKey> PendingLobbyRetrieved;
+    public Action<Solana.Unity.Wallet.PublicKey> ActiveLobbyRetrieved;
 
     public Solana.Unity.Wallet.PublicKey PendingLobby;
 
     private List<BrawlerData> myBrawlers = new();
     private List<PublicKey> myBrawlersPubKeys = new();
+
+    private List<BrawlerData> activeGameBrawlers = new();
+
     private bool initialSubcribed;
     private Coroutine errorRoutine;
 
     public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
+    public List<BrawlerData> ActiveGameBrawlers { get => activeGameBrawlers; set => activeGameBrawlers = value; }
+
+    public bool IsPlayingOutBattle { get; set; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
@@ -173,7 +181,7 @@ public class GameScreen : MonoBehaviour
         }
         else if (isInitialized)
         {
-            Debug.Log("We have an active profile!");
+           // Debug.Log("We have an active profile!");
 
             if (!initialSubcribed)
             {
@@ -209,28 +217,25 @@ public class GameScreen : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.L))
-        {
-            OpenBrawl();
-        }
+        //if (Input.GetKeyUp(KeyCode.L))
+        //{
+        //    OpenBrawl();
+        //}
 
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = SuperCamera.instance.Camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            Vector2 rayOrigin = SuperCamera.instance.Camera.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.zero);
 
-            if (Physics.Raycast(ray, out hit))
+            if (hit.collider != null)
             {
-                if (hit.transform != null)
+                if (hit.transform.TryGetComponent(out BrawlerCharacter character))
                 {
-                    if (hit.transform.TryGetComponent(out BrawlerCharacter character))
+                    if (MyBrawlers.Contains(character.MyBrawlerData))
                     {
-                        if (MyBrawlers.Contains(character.MyBrawlerData))
+                        if (profileScreen.isShowingProfile)
                         {
-                            if (profileScreen.isShowingProfile)
-                            {
-                                ClickedBrawler(character);
-                            }
+                            ClickedBrawler(character);
                         }
                     }
                 }
@@ -254,22 +259,27 @@ public class GameScreen : MonoBehaviour
 
     public void OpenLab()
     {
+        IsPlayingOutBattle = false;
         DisableAllScreens();
         graveyardScreen.Toggle(true);
     }
 
     public void OpenProfile()
     {
+        IsPlayingOutBattle = false;
         DisableAllScreens();
         profileScreen.Toggle(true);
     }
 
     public void OpenBrawl()
     {
-        AudioManager.instance.PlayBattleMusic();
-        DisableAllScreens();
-        brawlScreen.Toggle(true);
-        brawlScreen.PlayOutFights(myBrawlers, myBrawlers[0].publicKey, myBrawlers[0].publicKey);
+        if (ActiveGameBrawlers.Count > 0)
+        {
+            AudioManager.instance.PlayBattleMusic();
+            DisableAllScreens();
+            brawlScreen.Toggle(true);
+            brawlScreen.PlayOutFights(ActiveGameBrawlers.Take(8).ToList(), myBrawlers[UnityEngine.Random.Range(0, myBrawlers.Count)].brawlerKey, myBrawlers[0].brawlerKey);
+        }
     }
 
     private void DisableAllScreens()
@@ -374,7 +384,8 @@ public class GameScreen : MonoBehaviour
                         brawlerType = (BrawlerData.BrawlerType)brawlIntType,
                         characterType = (BrawlerData.CharacterType)charIntType,
                         username = fetchedBrawler.Name,
-                        publicKey = fetchedBrawler.Owner,
+                        ownerKey = fetchedBrawler.Owner,
+                        brawlerKey = brawl,
                     };
 
                     myBrawlers.Add(brawlerData);

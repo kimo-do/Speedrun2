@@ -469,6 +469,20 @@ public class BrawlAnchorService : MonoBehaviour
         return brawls;
     }
 
+    public async Task<Brawl> FetchBrawl(PublicKey brawlKey)
+    {
+        Brawl fetchedBrawl = null;
+
+        var brawlData = await anchorClient.GetBrawlAsync(brawlKey, Commitment.Confirmed);
+
+        if (brawlData.ParsedResult != null)
+        {
+            fetchedBrawl = brawlData.ParsedResult;
+        }
+
+        return fetchedBrawl;
+    }
+
     public async Task<Brawler> FetchBrawler(PublicKey brawler)
     {
         Brawler foundBrawler = null;

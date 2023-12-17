@@ -8,7 +8,8 @@ public class BrawlerData
     public CharacterType characterType;
     public BrawlerType brawlerType;
     public string username;
-    public PublicKey publicKey;
+    public PublicKey ownerKey;
+    public PublicKey brawlerKey;
 
     public enum CharacterType
     {

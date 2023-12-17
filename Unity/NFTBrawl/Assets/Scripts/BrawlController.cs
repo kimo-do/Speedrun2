@@ -63,6 +63,7 @@ public class BrawlController : Window
     private void CloseBrawlClicked()
     {
         GameScreen.instance.OpenProfile();
+        HideResultInstant();
     }
 
     public override void Toggle(bool toggle)
@@ -128,21 +129,16 @@ public class BrawlController : Window
 
         brawlerLineup = new();
 
-        BrawlerData winnerData = null;
+        //rawlerData winnerData = null;
+
+        ListShuffler.Shuffle(allBrawlers);
 
         foreach (var brawler in allBrawlers)
         {
-            if (brawler.publicKey != winner)
-            {
-                brawlerLineup.Enqueue(brawler);
-            }
-            else
-            {
-                winnerData = brawler;
-            }
+            brawlerLineup.Enqueue(brawler);
         }
 
-        brawlerLineup.Enqueue(winnerData);
+        //brawlerLineup.Enqueue(winnerData);
 
         if (playoutFightsRoutine != null)
         {
@@ -165,7 +161,14 @@ public class BrawlController : Window
         leftFighterDied = false;
         readyForFight = false;
 
-        while (brawlerLineup.Count > 1)
+        Debug.Log(" ---- Brawler Lineup");
+        foreach (var br in brawlerLineup.ToList())
+        {
+            Debug.Log(" - " + br.brawlerKey);
+        }
+        Debug.Log(" ----");
+
+        while (brawlerLineup.Count > 0)
         {
             readyForFight = false;
 
@@ -177,7 +180,10 @@ public class BrawlController : Window
                 RemoveFromCrowd(fighter1);
                 RemoveFromCrowd(fighter2);
 
-                InitFightSequence(fighter1, fighter2);
+                InitFightSequence(fighter1, fighter2, true, true);
+
+                Debug.Log(" # removed and starting to fight: " + fighter1.brawlerKey);
+                Debug.Log(" # removed and starting to fight: " + fighter2.brawlerKey);
 
                 isFirstFight = false;
             }
@@ -185,14 +191,18 @@ public class BrawlController : Window
             {
                 BrawlerData newFighter = brawlerLineup.Dequeue();
 
+                RemoveFromCrowd(newFighter);
+
                 if (leftFighterDied)
                 {
-                    InitFightSequence(newFighter, this.secondBrawler);
+                    InitFightSequence(newFighter, this.secondBrawler, true, false);
                 }
                 else
                 {
-                    InitFightSequence(this.firstBrawler, newFighter);
+                    InitFightSequence(this.firstBrawler, newFighter, false, true);
                 }
+
+                Debug.Log(" # removed and starting to fight: " + newFighter.brawlerKey);
             }
 
             yield return new WaitUntil(() => readyForFight == true);
@@ -215,11 +225,11 @@ public class BrawlController : Window
     {
         bool isLeftWinner = false;
 
-        if (this.winner.ToString() == this.firstBrawler.publicKey.ToString())
+        if (this.winner.ToString() == this.firstBrawler.ownerKey.ToString())
         {
             isLeftWinner = true;
         }
-        else if (this.winner.ToString() == this.secondBrawler.publicKey.ToString())
+        else if (this.winner.ToString() == this.secondBrawler.ownerKey.ToString())
         {
             isLeftWinner = false;
         }
@@ -229,7 +239,7 @@ public class BrawlController : Window
             isLeftWinner = UnityEngine.Random.value >= 0.5f;
         }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1.5f);
 
         if (isLeftWinner)
         {
@@ -242,12 +252,16 @@ public class BrawlController : Window
 
         leftFighterDied = isLeftWinner == false;
 
-        yield return new WaitForSeconds(2f);       
+        Debug.Log(" $ elimninated: " + (isLeftWinner ? this.secondBrawler.brawlerKey.ToString() : this.firstBrawler.brawlerKey.ToString()));
+        Debug.Log(" --------");
+
+
+        yield return new WaitForSeconds(1.7f);       
     }
 
     public void RemoveFromCrowd(BrawlerData data)
     {
-        GameObject brawler = crowd.FirstOrDefault(b => b.GetComponent<BrawlerCharacter>().MyBrawlerData == data);
+        GameObject brawler = crowd.FirstOrDefault(b => b.GetComponent<BrawlerCharacter>().MyBrawlerData.brawlerKey == data.brawlerKey);
 
         if (brawler != null)
         {
@@ -277,13 +291,20 @@ public class BrawlController : Window
         }
     }
 
-    public void InitFightSequence(BrawlerData firstBrawler, BrawlerData secondBrawler)
+    public void InitFightSequence(BrawlerData firstBrawler, BrawlerData secondBrawler, bool moveLeft, bool moveRight)
     {
         this.firstBrawler = firstBrawler;
         this.secondBrawler = secondBrawler;
 
-        brawlerLeft.transform.position = leftOutside.position;
-        brawlerRight.transform.position = rightOutside.position;
+        if (moveLeft)
+        {
+            brawlerLeft.transform.position = leftOutside.position;
+        }
+
+        if (moveRight)
+        {
+            brawlerRight.transform.position = rightOutside.position;
+        }
 
         brawlerLeft.GetComponent<BrawlerCharacter>().SetBrawlerData(this.firstBrawler);
         brawlerRight.GetComponent<BrawlerCharacter>().SetBrawlerData(this.secondBrawler);
@@ -296,12 +317,12 @@ public class BrawlController : Window
             StopCoroutine(fightSequence);
         }
 
-        fightSequence = StartCoroutine(FightSequence());
+        fightSequence = StartCoroutine(FightSequence(moveLeft, moveRight));
     }
 
-    IEnumerator FightSequence()
+    IEnumerator FightSequence(bool moveLeft, bool moveRight)
     {
-        MoveBothIntoBattlePositions();
+        MoveBothIntoBattlePositions(moveLeft, moveRight);
 
         yield return new WaitForSeconds(0.8f);
 
@@ -317,7 +338,7 @@ public class BrawlController : Window
         versusAnim.Play("versus_ui");
     }
 
-    private void MoveBothIntoBattlePositions()
+    private void MoveBothIntoBattlePositions(bool moveLeft, bool moveRight)
     {
         if (leftPlayerRoutine != null)
         {
@@ -329,8 +350,15 @@ public class BrawlController : Window
             StopCoroutine(rightPlayerRoutine);
         }
 
-        leftPlayerRoutine = StartCoroutine(MoveIntoBattleVisuals(0f, true));
-        rightPlayerRoutine = StartCoroutine(MoveIntoBattleVisuals(0.3f, false));
+        if (moveLeft)
+        {
+            leftPlayerRoutine = StartCoroutine(MoveIntoBattleVisuals(0f, true));
+        }
+
+        if (moveRight)
+        {
+            rightPlayerRoutine = StartCoroutine(MoveIntoBattleVisuals(0.3f, false));
+        }
     }
 
     public void DoAttack(bool forLeftPlayer)
@@ -387,7 +415,22 @@ public class BrawlController : Window
             resultAnim["eliminated_ui"].speed = -1f;
             resultAnim.Play("eliminated_ui");
         }
-        
+    }
+
+    public void HideResultInstant()
+    {
+        if (shownVictory)
+        {
+            resultAnim["victory_ui"].time = resultAnim["victory_ui"].length;
+            resultAnim["victory_ui"].speed = -100f;
+            resultAnim.Play("victory_ui");
+        }
+        else
+        {
+            resultAnim["eliminated_ui"].time = resultAnim["eliminated_ui"].length;
+            resultAnim["eliminated_ui"].speed = -100f;
+            resultAnim.Play("eliminated_ui");
+        }
     }
 
     IEnumerator MoveIntoBattleVisuals(float delay, bool isLeftPlayer)

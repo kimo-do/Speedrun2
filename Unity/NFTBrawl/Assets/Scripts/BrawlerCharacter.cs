@@ -7,6 +7,7 @@ using UnityEngine;
 public class BrawlerCharacter : MonoBehaviour
 {
     public List<VisualBrawlerData> visualBrawlers;
+    public RuntimeAnimatorController defaultAnims;
     public Animator abilityAnimator;
     public GameObject selection;
 
@@ -52,6 +53,10 @@ public class BrawlerCharacter : MonoBehaviour
             if (myVisualBrawler.controller != null)
             {
                 animator.runtimeAnimatorController = myVisualBrawler.controller;
+            }
+            else
+            {
+                animator.runtimeAnimatorController = defaultAnims;
             }
         }
         else

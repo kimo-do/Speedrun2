@@ -1,3 +1,4 @@
+using Deathbattle.Accounts;
 using Solana.Unity.SDK;
 using Solana.Unity.Wallet;
 using System;
@@ -25,6 +26,8 @@ public class ProfileController : Window
     public Button joinOpenLobbyButton;
     public Button createNewBrawl;
     public bool isShowingProfile;
+
+    public PublicKey AttemptedJoinLobby;
 
     public override void Awake()
     {
@@ -71,6 +74,7 @@ public class ProfileController : Window
     {
         GameScreen.instance.BrawlersRetrieved += OnBrawlersUpdated;
         GameScreen.instance.PendingLobbyRetrieved += OnPendingLobbyFound;
+        GameScreen.instance.ActiveLobbyRetrieved += OnActiveLobbyFound;
 
         labButton1.onClick.AddListener(ClickedOpenLab);
         labButton2.onClick.AddListener(ClickedOpenLab);
@@ -95,15 +99,16 @@ public class ProfileController : Window
 
             if (GameScreen.instance.selectedCharacter != null)
             {
-                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.publicKey;
+                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.ownerKey;
             }
             else
             {
-                myBrawler = GameScreen.instance.MyBrawlers[0].publicKey;
+                myBrawler = GameScreen.instance.MyBrawlers[0].ownerKey;
             }
 
             if (myBrawler != null)
             {
+                AttemptedJoinLobby = GameScreen.instance.PendingLobby;
                 BrawlAnchorService.Instance.JoinBrawl(GameScreen.instance.PendingLobby, myBrawler);
             }
             else
@@ -116,6 +121,64 @@ public class ProfileController : Window
     private void OnPendingLobbyFound(PublicKey lobbyPubkey)
     {
         UpdateProfileView();
+    }
+
+    private void OnActiveLobbyFound(PublicKey lobbyPubkey)
+    {
+        if (AttemptedJoinLobby != null)
+        {
+            if (AttemptedJoinLobby == lobbyPubkey)
+            {
+                if (!GameScreen.instance.IsPlayingOutBattle)
+                {
+                    GameScreen.instance.IsPlayingOutBattle = true;
+                    FetchAllParticipatingBrawlers(lobbyPubkey);
+                }
+            }
+        }
+    }
+
+    private async void FetchAllParticipatingBrawlers(PublicKey brawl)
+    {
+        Brawl activeBrawl = await BrawlAnchorService.Instance.FetchBrawl(brawl);
+
+        if (activeBrawl != null)
+        {
+            Debug.Log($"Fetched active brawl: {brawl.ToString()}, Players: {activeBrawl.Queue.Length}");
+            Debug.Log($"Fetching all brawlers..");
+
+            List<Brawler> brawlers = await BrawlAnchorService.Instance.FetchAllBrawlersFromBrawl(activeBrawl);
+
+            if (brawlers != null)
+            {
+                Debug.Log($"Fetched all brawlers from active brawl: {brawlers.Count}");
+
+                GameScreen.instance.ActiveGameBrawlers = new();
+
+                foreach (var br in brawlers)
+                {
+                    if (br != null)
+                    {
+                        int brawlIntType = (int)br.BrawlerType;
+                        int charIntType = (int)br.CharacterType;
+                        string brawlName = br.Name;
+
+                        BrawlerData brawlerData = new BrawlerData()
+                        {
+                            brawlerType = (BrawlerData.BrawlerType)brawlIntType,
+                            characterType = (BrawlerData.CharacterType)charIntType,
+                            username = br.Name,
+                            ownerKey = br.Owner,
+                            brawlerKey = brawl,
+                        };
+
+                        GameScreen.instance.ActiveGameBrawlers.Add(brawlerData);
+
+                        MainThreadDispatcher.Instance().Enqueue(GameScreen.instance.OpenBrawl);
+                    }
+                }
+            }
+        }
     }
 
     private void ClickedOpenLab()
