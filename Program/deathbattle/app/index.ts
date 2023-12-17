@@ -44,7 +44,7 @@ program.command('create_clone_lab')
     });
 
 program.command('create_colosseum')
-    .description('Create a Colosseum')
+    .description('Close a Colosseum')
     .option('-r --rpc <string>', 'The endpoint to connect to.')
     .option('-k --keypair <string>', 'Solana wallet location')
     .action(async (str: any, options: any) => {
@@ -134,6 +134,34 @@ program.command('create_graveyard')
 
         const graveyard = await program.account.graveyard.fetch(graveyardAddress[0]);
         console.log("Graveyard:", graveyard);
+    });
+
+    program.command('close_all_brawls')
+    .description('Close all brawls')
+    .option('-r --rpc <string>', 'The endpoint to connect to.')
+    .option('-k --keypair <string>', 'Solana wallet location')
+    .action(async (str: any, options: any) => {
+        const { rpc, keypair } = options.opts();
+
+        const connection = new web3.Connection(rpc, 'confirmed');
+        const provider = new AnchorProvider(connection, loadWalletKey(keypair), {});
+        const program = new Program(idl, programID, provider);
+
+        const allBrawls = await program.account.brawl.all();
+        console.log("All Brawls:", allBrawls);
+
+        allBrawls.forEach(async (brawl) => {
+            const tx = await program.methods
+                .closeAccount()
+                .accounts({
+                    account: brawl.publicKey,
+                    payer: provider.wallet.publicKey,
+                })
+                // .signers([provider.wallet])
+                .rpc();
+
+            console.log("Your transaction signature", tx);
+        });
     });
 
 program.parse(process.argv);
