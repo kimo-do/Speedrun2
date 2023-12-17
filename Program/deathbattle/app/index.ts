@@ -74,6 +74,37 @@ program.command('create_colosseum')
         console.log("Colosseum:", colosseum);
     });
 
+program.command('close_colosseum')
+    .description('Create a Colosseum')
+    .option('-r --rpc <string>', 'The endpoint to connect to.')
+    .option('-k --keypair <string>', 'Solana wallet location')
+    .action(async (str: any, options: any) => {
+        const { rpc, keypair } = options.opts();
+
+        const connection = new web3.Connection(rpc, 'confirmed');
+        const provider = new AnchorProvider(connection, loadWalletKey(keypair), {});
+        const program = new Program(idl, programID, provider);
+
+        const colosseumAddress = web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("colosseum"), provider.wallet.publicKey.toBuffer()],
+            program.programId
+        );
+
+        const tx = await program.methods
+            .closeAccount()
+            .accounts({
+                account: colosseumAddress[0],
+                payer: provider.wallet.publicKey,
+            })
+            // .signers([provider.wallet])
+            .rpc();
+
+        console.log("Your transaction signature", tx);
+
+        const colosseum = await program.account.colosseum.fetch(colosseumAddress[0]);
+        console.log("Colosseum:", colosseum);
+    });
+
 program.command('create_graveyard')
     .description('Create a Graveyard')
     .option('-r --rpc <string>', 'The endpoint to connect to.')

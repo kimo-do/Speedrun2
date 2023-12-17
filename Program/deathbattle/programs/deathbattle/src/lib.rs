@@ -53,4 +53,8 @@ pub mod deathbattle {
     pub fn run_match(ctx: Context<RunMatch>) -> Result<()> {
         RunMatch::handler(ctx)
     }
+
+    pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
+        CloseAccount::handler(ctx)
+    }
 }

@@ -1,6 +1,6 @@
 use anchor_lang::{prelude::*, solana_program};
 
-use crate::{error::BrawlError, rand_choice, Brawl, CloneLab, Graveyard};
+use crate::{error::BrawlError, rand_choice, Brawl, CloneLab, Colosseum, Graveyard};
 
 #[derive(Accounts)]
 pub struct RunMatch<'info> {
@@ -12,6 +12,10 @@ pub struct RunMatch<'info> {
         realloc::zero=false
     )]
     pub clone_lab: Account<'info, CloneLab>,
+
+    /// The Colosseum account. The brawl will transition from pending to ended.
+    #[account(mut)]
+    pub colosseum: Account<'info, Colosseum>,
 
     /// The Graveyard account. The losing clones will go here.
     #[account(
@@ -68,6 +72,22 @@ impl<'info> RunMatch<'info> {
         // Send the losers to the Graveyard.
         for loser in brawlers.iter() {
             ctx.accounts.graveyard.brawlers.push(loser.key());
+        }
+
+        if let Some(index) = ctx
+            .accounts
+            .colosseum
+            .active_brawls
+            .iter()
+            .position(|value| *value == ctx.accounts.brawl.key())
+        {
+            ctx.accounts.colosseum.active_brawls.swap_remove(index);
+            ctx.accounts
+                .colosseum
+                .ended_brawls
+                .push(ctx.accounts.brawl.key());
+        } else {
+            err!(BrawlError::InvalidBrawl)?;
         }
 
         Ok(())

@@ -15,7 +15,7 @@ pub struct CreateColosseum<'info> {
     pub colosseum: Account<'info, Colosseum>,
 
     /// The creator of the Colosseum. In most cases this will be the game's keypair managing the public lobby.
-    #[account(signer, mut)]
+    #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }

@@ -10,6 +10,8 @@ pub struct Colosseum {
     pub pending_brawls: Vec<Pubkey>,
     /// A list of the brawls ready to go.
     pub active_brawls: Vec<Pubkey>,
+    /// A list of the ended brawls.
+    pub ended_brawls: Vec<Pubkey>,
 }
 
 impl Colosseum {
@@ -18,7 +20,8 @@ impl Colosseum {
     + 1 // The 1 byte bump
     + 4 // The 4 byte brawl counter
     + 4 // The 4 byte length of the pending brawls vec
-    + 4; // The 4 byte length of the active brawls vec
+    + 4 // The 4 byte length of the active brawls vec
+    + 4; // The 4 byte length of the ended brawls vec
 
     #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {

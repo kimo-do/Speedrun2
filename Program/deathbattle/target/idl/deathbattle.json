@@ -304,6 +304,14 @@
           ]
         },
         {
+          "name": "colosseum",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Colosseum account. The brawl will transition from pending to ended."
+          ]
+        },
+        {
           "name": "graveyard",
           "isMut": true,
           "isSigner": false,
@@ -330,6 +338,22 @@
           "name": "slotHashes",
           "isMut": false,
           "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
         }
       ],
       "args": []
@@ -488,6 +512,15 @@
             "name": "activeBrawls",
             "docs": [
               "A list of the brawls ready to go."
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "endedBrawls",
+            "docs": [
+              "A list of the ended brawls."
             ],
             "type": {
               "vec": "publicKey"
