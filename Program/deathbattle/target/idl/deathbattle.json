@@ -245,6 +245,22 @@
       "name": "runMatch",
       "accounts": [
         {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone Lab account. The winner will go back here."
+          ]
+        },
+        {
+          "name": "graveyard",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Graveyard account. The losing clones will go here."
+          ]
+        },
+        {
           "name": "brawl",
           "isMut": true,
           "isSigner": false
@@ -253,6 +269,11 @@
           "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "slotHashes",
