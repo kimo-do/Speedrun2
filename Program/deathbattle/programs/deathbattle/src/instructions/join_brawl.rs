@@ -18,7 +18,12 @@ pub struct JoinBrawl<'info> {
     #[account(mut)]
     pub colosseum: Account<'info, Colosseum>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        realloc=Brawl::LEN,
+        realloc::payer=payer,
+        realloc::zero=false
+    )]
     pub brawl: Account<'info, Brawl>,
 
     pub brawler: Account<'info, Brawler>,
