@@ -178,8 +178,12 @@ public class ProfileController : Window
                         AttemptedJoinLobby = null;
                     }
                 }
-            
-                BrawlAnchorService.Instance.RunMatch(true, OnRunMatch, readyBrawl);
+
+                if (!GameScreen.instance.AttemptedToStartBrawls.Contains(readyBrawl))
+                {
+                    GameScreen.instance.AttemptedToStartBrawls.Add(readyBrawl);
+                    BrawlAnchorService.Instance.RunMatch(true, OnRunMatch, readyBrawl);
+                }
             }
         }
         else

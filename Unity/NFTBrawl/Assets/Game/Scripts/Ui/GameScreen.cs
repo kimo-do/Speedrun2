@@ -81,6 +81,8 @@ public class GameScreen : MonoBehaviour
     private List<PublicKey> pendingJoinableBrawls = new();
     private List<PublicKey> readyToStartBrawls = new();
     private List<PublicKey> endedBrawls = new();
+    private List<PublicKey> attemptedToStartBrawls = new();
+
 
     private bool initialSubcribed;
     private Coroutine errorRoutine;
@@ -96,6 +98,7 @@ public class GameScreen : MonoBehaviour
     public List<PublicKey> EndedBrawls { get => endedBrawls; set => endedBrawls = value; }
     public List<PublicKey> MyBrawlersPubKeys { get => myBrawlersPubKeys; set => myBrawlersPubKeys = value; }
     public PublicKey ActivePlayingBrawl { get => activePlayingBrawl; set => activePlayingBrawl = value; }
+    public List<PublicKey> AttemptedToStartBrawls { get => attemptedToStartBrawls; set => attemptedToStartBrawls = value; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
