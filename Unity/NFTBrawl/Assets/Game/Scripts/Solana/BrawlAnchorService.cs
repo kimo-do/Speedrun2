@@ -776,7 +776,7 @@ public class BrawlAnchorService : MonoBehaviour
         }
 
         bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "create_clone",
-            () => { Debug.Log("Create clone was successful"); }, s => { Debug.LogError("Create Clone was not successful"); });
+            onSuccess, s => { Debug.LogError("Create Clone was not successful"); });
     }
 
     public async void ReviveBrawler(bool useSession, Action onSuccess)
@@ -830,7 +830,7 @@ public class BrawlAnchorService : MonoBehaviour
         }
 
         bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "revive_clone",
-            () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
+            onSuccess, s => { Debug.LogError("Revive Clone was not successful"); });
     }
 
     public async void RunMatch(bool useSession, Action onSuccess, PublicKey brawlPDA)
