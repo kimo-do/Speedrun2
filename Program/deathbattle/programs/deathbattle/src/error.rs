@@ -30,6 +30,11 @@ pub enum BrawlError {
     #[msg("Numerical overflow error.")]
     NumericalOverflowError,
 
+    /// 1006 - Winner not determined.
     #[msg("Winner not determined")]
-    WinnerNotDetermined
+    WinnerNotDetermined,
+
+    /// 1007 - Invalid Winner.
+    #[msg("Invalid Winner")]
+    InvalidWinner,
 }

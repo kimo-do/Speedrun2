@@ -17,7 +17,12 @@ pub struct StartBrawl<'info> {
     )]
     pub brawl: Account<'info, Brawl>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        realloc=colosseum.len() + 32,
+        realloc::payer=payer,
+        realloc::zero=false
+    )]
     pub colosseum: Account<'info, Colosseum>,
 
     #[account(mut)]

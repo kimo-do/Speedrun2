@@ -362,6 +362,11 @@
       "name": "clearEndedBrawl",
       "accounts": [
         {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "colosseum",
           "isMut": true,
           "isSigner": false
@@ -373,6 +378,11 @@
           "docs": [
             "The brawl to remove"
           ]
+        },
+        {
+          "name": "winner",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "payer",
@@ -781,6 +791,11 @@
       "code": 6007,
       "name": "WinnerNotDetermined",
       "msg": "Winner not determined"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidWinner",
+      "msg": "Invalid Winner"
     }
   ]
 }
