@@ -36,6 +36,7 @@ impl Brawl {
     + 1 // The 1 byte bump
     + 4 // The 4 byte length of the queue vec
     + (32 * 8) // The 32 byte length of each Pubkey in the queue
+    + 32 // The 32 byte length of the winner
     + 4 // The 4 byte length of the matches vec
     + Match::LEN * MAX_MATCHES; // The number of matchups
 }

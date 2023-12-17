@@ -184,6 +184,25 @@ program.command('close_all_brawls')
         });
     });
 
+    program.command('print_all_brawls')
+    .description('Close all brawls')
+    .option('-r --rpc <string>', 'The endpoint to connect to.')
+    .option('-k --keypair <string>', 'Solana wallet location')
+    .action(async (str: any, options: any) => {
+        const { rpc, keypair } = options.opts();
+
+        const connection = new web3.Connection(rpc, 'confirmed');
+        const provider = new AnchorProvider(connection, loadWalletKey(keypair), {});
+        const program = new Program(idl, programID, provider);
+
+        const allBrawls = await program.account.brawl.all();
+        // console.log("All Brawls:", allBrawls);
+        allBrawls.forEach(async (brawl) => {
+            const brawlAccount = await program.account.brawl.fetch(brawl.publicKey);
+            console.log("Brawl:", brawlAccount);
+        });
+    });
+
 program.parse(process.argv);
 
 export function loadWalletKey(keypair: string): Wallet {
