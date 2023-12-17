@@ -69,6 +69,7 @@ public class GameScreen : MonoBehaviour
     //public Action<LobbyData> PendingLobbiesRetrieved;
     public Action<Solana.Unity.Wallet.PublicKey> PendingLobbyRetrieved;
     public Action<Solana.Unity.Wallet.PublicKey> ActiveLobbyRetrieved;
+    public Action<Solana.Unity.Wallet.PublicKey> EndedLobbyRetrieved;
 
     private List<BrawlerData> myBrawlers = new();
     private List<PublicKey> myBrawlersPubKeys = new();
@@ -77,6 +78,8 @@ public class GameScreen : MonoBehaviour
     private PublicKey activeGameWinner;
 
     private List<PublicKey> pendingJoinableBrawls = new();
+    private List<PublicKey> readyToStartBrawls = new();
+    private List<PublicKey> endedBrawls = new();
 
     private bool initialSubcribed;
     private Coroutine errorRoutine;
@@ -88,6 +91,9 @@ public class GameScreen : MonoBehaviour
     public bool IsPlayingOutBattle { get; set; }
     public bool HoldWalletUpdates { get; set; }
     public List<PublicKey> PendingJoinableBrawls { get => pendingJoinableBrawls; set => pendingJoinableBrawls = value; }
+    public List<PublicKey> ReadyToStartBrawls { get => readyToStartBrawls; set => readyToStartBrawls = value; }
+    public List<PublicKey> EndedBrawls { get => endedBrawls; set => endedBrawls = value; }
+    public List<PublicKey> MyBrawlersPubKeys { get => myBrawlersPubKeys; set => myBrawlersPubKeys = value; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
@@ -214,7 +220,9 @@ public class GameScreen : MonoBehaviour
     {
         if (colosseum != null)
         {
-            Debug.Log("Received colosseum update: " + colosseum.PendingBrawls.Length);
+            Debug.Log("Received colosseum update pending: " + colosseum.PendingBrawls.Length);
+            Debug.Log("Received colosseum update active: " + colosseum.ActiveBrawls.Length);
+            Debug.Log("Received colosseum update ended: " + colosseum.EndedBrawls.Length);
 
             if (colosseum.PendingBrawls.Length > 0)
             {
@@ -224,6 +232,18 @@ public class GameScreen : MonoBehaviour
             else
             {
                 profileScreen.createNewBrawl.gameObject.SetActive(true);
+            }
+
+            if (colosseum.ActiveBrawls.Length > 0)
+            {
+                readyToStartBrawls = new(colosseum.ActiveBrawls);
+                ActiveLobbyRetrieved?.Invoke(readyToStartBrawls[0]);
+            }
+
+            if (colosseum.EndedBrawls.Length > 0)
+            {
+                endedBrawls = new(colosseum.EndedBrawls);
+                EndedLobbyRetrieved?.Invoke(endedBrawls[0]);
             }
         }
     }

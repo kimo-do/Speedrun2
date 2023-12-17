@@ -4,7 +4,9 @@ using Solana.Unity.Wallet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -87,6 +89,8 @@ public class ProfileController : Window
         GameScreen.instance.BrawlersRetrieved += OnBrawlersUpdated;
         GameScreen.instance.PendingLobbyRetrieved += OnPendingLobbyFound;
         GameScreen.instance.ActiveLobbyRetrieved += OnActiveLobbyFound;
+        GameScreen.instance.EndedLobbyRetrieved += OnEndedLobbyFound;
+
 
         labButton1.onClick.AddListener(ClickedOpenLab);
         labButton2.onClick.AddListener(ClickedOpenLab);
@@ -97,6 +101,8 @@ public class ProfileController : Window
         noBrawlers.gameObject.SetActive(true);
         yourBrawlers.gameObject.SetActive(true);
     }
+
+
 
     private void ClickedCreateBrawl()
     {
@@ -140,16 +146,64 @@ public class ProfileController : Window
         UpdateProfileView();
     }
 
+
     private void OnActiveLobbyFound(PublicKey lobbyPubkey)
     {
-        if (AttemptedJoinLobby != null)
+        // attempt to start all active lobbies found
+
+        if (GameScreen.instance.ReadyToStartBrawls.Count > 0)
         {
-            if (AttemptedJoinLobby == lobbyPubkey)
+            Debug.Log($"Attempting to start all ({GameScreen.instance.ReadyToStartBrawls.Count}) brawls.");
+
+            foreach (var readyBrawl in GameScreen.instance.ReadyToStartBrawls)
             {
-                if (!GameScreen.instance.IsPlayingOutBattle)
+                BrawlAnchorService.Instance.RunMatch(true, OnRunMatch, readyBrawl);
+            }
+        }
+        else
+        {
+            Debug.Log($"No active brawls found..");
+        }
+    }
+
+    private void OnRunMatch()
+    {
+
+    }
+
+    private void OnEndedLobbyFound(PublicKey endedLobby)
+    {
+        Debug.Log($"Found new ended lobbies, checking if I was a part of it..");
+
+        if (GameScreen.instance.EndedBrawls.Count > 0)
+        {
+            FetchEndedBrawls(GameScreen.instance.EndedBrawls);
+        }
+    }
+
+    private async void FetchEndedBrawls(List<PublicKey> endedBrawls)
+    {
+        foreach (var brawl in endedBrawls)
+        {
+            Brawl endedBrawl = await BrawlAnchorService.Instance.FetchBrawl(brawl);
+
+            if (endedBrawl != null)
+            {
+                if (endedBrawl.Queue != null)
                 {
-                    GameScreen.instance.IsPlayingOutBattle = true;
-                    FetchAllParticipatingBrawlers(lobbyPubkey);
+                    foreach (var queuedBrawler in endedBrawl.Queue)
+                    {
+                        if (GameScreen.instance.MyBrawlersPubKeys.Any(pb => pb.ToString() == queuedBrawler.ToString()))
+                        {
+                            // I was in this ended match.
+                            if (!GameScreen.instance.IsPlayingOutBattle)
+                            {
+                                GameScreen.instance.IsPlayingOutBattle = true;
+                                FetchAllParticipatingBrawlers(brawl);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
