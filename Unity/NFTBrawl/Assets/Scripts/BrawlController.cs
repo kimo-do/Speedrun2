@@ -275,7 +275,7 @@ public class BrawlController : Window
 
     public void RemoveFromCrowd(BrawlerData data)
     {
-        GameObject brawler = crowd.FirstOrDefault(b => b.GetComponent<BrawlerCharacter>().MyBrawlerData.brawlerKey == data.brawlerKey);
+        GameObject brawler = crowd.FirstOrDefault(b => b.GetComponent<BrawlerCharacter>().MyBrawlerData.brawlerKey.ToString() == data.brawlerKey.ToString());
 
         if (brawler != null)
         {
