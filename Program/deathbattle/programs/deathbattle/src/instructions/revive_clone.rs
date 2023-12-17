@@ -3,7 +3,7 @@ use anchor_lang::{
     solana_program::{program::invoke, system_instruction},
 };
 
-use crate::{Brawler, CloneLab, Graveyard, Profile};
+use crate::{resize_or_reallocate_account_raw, Brawler, CloneLab, Graveyard, Profile};
 
 // #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, PartialEq)]
 // pub struct ReviveCloneArgs {
@@ -16,18 +16,18 @@ pub struct ReviveClone<'info> {
     /// The Clone Lab account. This will be used to store the clone.
     #[account(
         mut,
-        realloc=clone_lab.len() + 32,
-        realloc::payer=payer,
-        realloc::zero=false
+        // realloc=clone_lab.len() + 32,
+        // realloc::payer=payer,
+        // realloc::zero=false
     )]
     pub clone_lab: Account<'info, CloneLab>,
 
     /// The Graveyard account. This will be where the clone is revived from.
     #[account(
         mut,
-        realloc=graveyard.len() - 32,
-        realloc::payer=payer,
-        realloc::zero=false
+        // realloc=graveyard.len() - 32,
+        // realloc::payer=payer,
+        // realloc::zero=false
     )]
     pub graveyard: Account<'info, Graveyard>,
 
@@ -82,6 +82,20 @@ impl<'info> ReviveClone<'info> {
                 ctx.accounts.clone_lab.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
+        )?;
+
+        resize_or_reallocate_account_raw(
+            &ctx.accounts.clone_lab.to_account_info(),
+            &ctx.accounts.payer.to_account_info(),
+            &ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.clone_lab.len() + 32,
+        )?;
+
+        resize_or_reallocate_account_raw(
+            &ctx.accounts.graveyard.to_account_info(),
+            &ctx.accounts.payer.to_account_info(),
+            &ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.clone_lab.len() - 32,
         )?;
 
         Ok(())
