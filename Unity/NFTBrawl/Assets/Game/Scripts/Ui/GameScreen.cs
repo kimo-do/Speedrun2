@@ -206,6 +206,13 @@ public class GameScreen : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.L))
+        {
+            OpenBrawl();
+        }
+    }
 
     public void OpenLab()
     {
@@ -224,6 +231,7 @@ public class GameScreen : MonoBehaviour
         AudioManager.instance.PlayBattleMusic();
         DisableAllScreens();
         brawlScreen.Toggle(true);
+        brawlScreen.PlayOutFights(myBrawlers, myBrawlers[0].publicKey, myBrawlers[0].publicKey);
     }
 
     private void DisableAllScreens()
@@ -328,6 +336,7 @@ public class GameScreen : MonoBehaviour
                         brawlerType = (BrawlerData.BrawlerType)brawlIntType,
                         characterType = (BrawlerData.CharacterType)charIntType,
                         username = fetchedBrawler.Name,
+                        publicKey = fetchedBrawler.Owner,
                     };
 
                     myBrawlers.Add(brawlerData);

@@ -1,5 +1,7 @@
+using Solana.Unity.Wallet;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -41,6 +43,11 @@ public class BrawlController : Window
     private BrawlerData firstBrawler;
     private BrawlerData secondBrawler;
     private List<BrawlerData> crowdDataList;
+    private Coroutine playoutFightsRoutine;
+
+    private Dictionary<BrawlerData, bool> allBrawlersStatus = new();
+    private PublicKey winner;
+    private PublicKey myBrawlerKey;
 
     public override void Awake()
     {
@@ -61,45 +68,147 @@ public class BrawlController : Window
     }
 
     // Update is called once per frame
-    void Update()
+    //void Update()
+    //{
+    //    if (Input.GetKeyUp(KeyCode.B))
+    //    {
+    //        firstBrawler = new BrawlerData()
+    //        {
+    //            username = "Longnameguy",
+    //            characterType = BrawlerData.CharacterType.Female1,
+    //            brawlerType = BrawlerData.BrawlerType.Pistol,
+    //        };
+
+    //        secondBrawler = new BrawlerData()
+    //        {
+    //            username = "DaveR",
+    //            characterType = BrawlerData.CharacterType.Bonki,
+    //            brawlerType = BrawlerData.BrawlerType.Katana,
+    //        };
+
+    //        InitFightSequence(firstBrawler, secondBrawler);
+    //    }
+
+    //    if (Input.GetKeyUp(KeyCode.H))
+    //    {
+    //        DoAttack(true);
+    //    }
+
+    //    if (Input.GetKeyUp(KeyCode.J))
+    //    {
+    //        DoAttack(false);
+    //    }
+
+    //    if (Input.GetKeyUp(KeyCode.K))
+    //    {
+    //        brawlerRight.GetComponent<BrawlerCharacter>().SetDeath(true);
+    //    }
+
+    //    if (Input.GetKeyUp(KeyCode.L))
+    //    {
+    //        ShowBattleResult(false);
+    //    }
+    //}
+
+    public void PlayOutFights(List<BrawlerData> allBrawlers, PublicKey winner, PublicKey myBrawler)
     {
-        if (Input.GetKeyUp(KeyCode.B))
+        this.winner = winner;
+        this.myBrawlerKey = myBrawler;
+
+        allBrawlersStatus = new();
+
+        foreach (var brawler in allBrawlers)
         {
-            firstBrawler = new BrawlerData()
-            {
-                username = "Longnameguy",
-                characterType = BrawlerData.CharacterType.Female1,
-                brawlerType = BrawlerData.BrawlerType.Pistol,
-            };
-
-            secondBrawler = new BrawlerData()
-            {
-                username = "DaveR",
-                characterType = BrawlerData.CharacterType.Bonki,
-                brawlerType = BrawlerData.BrawlerType.Katana,
-            };
-
-            InitFightSequence(firstBrawler, secondBrawler);
+            allBrawlersStatus[brawler] = false;
         }
 
-        if (Input.GetKeyUp(KeyCode.H))
+        if (playoutFightsRoutine != null)
         {
-            DoAttack(true);
+            StopCoroutine(playoutFightsRoutine);
         }
 
-        if (Input.GetKeyUp(KeyCode.J))
+        playoutFightsRoutine = StartCoroutine(c_PlayoutFights());
+    }
+
+    private bool readyForFight = false;
+
+    IEnumerator c_PlayoutFights()
+    {
+        InitCrowd(allBrawlersStatus.Keys.ToList());
+
+        yield return new WaitForSeconds(1f);
+
+        List<KeyValuePair<BrawlerData, bool>> twoFighers = allBrawlersStatus.Where(a => a.Value == false).ToList();
+
+        while(twoFighers.Count > 1)
         {
-            DoAttack(false);
+            readyForFight = false;
+
+            allBrawlersStatus[twoFighers[0].Key] = true;
+            allBrawlersStatus[twoFighers[1].Key] = true;
+
+            RemoveFromCrowd(twoFighers[0].Key);
+            RemoveFromCrowd(twoFighers[1].Key);
+
+            InitFightSequence(twoFighers[0].Key, twoFighers[1].Key);
+
+            yield return new WaitUntil(() => readyForFight == true);
+
+            yield return StartCoroutine(autoPlayFight());
+
+            twoFighers = allBrawlersStatus.Where(a => a.Value == false).ToList();
         }
 
-        if (Input.GetKeyUp(KeyCode.K))
+        // All fights finished
+        if (winner.ToString() == myBrawlerKey.ToString())
         {
-            brawlerRight.GetComponent<BrawlerCharacter>().SetDeath(true);
+            ShowBattleResult(true);
         }
-
-        if (Input.GetKeyUp(KeyCode.L))
+        else
         {
             ShowBattleResult(false);
+        }
+    }
+
+    IEnumerator autoPlayFight()
+    {
+        bool isLeftWinner = false;
+
+        if (this.winner.ToString() == this.firstBrawler.publicKey.ToString())
+        {
+            isLeftWinner = true;
+        }
+        else if (this.winner.ToString() == this.secondBrawler.publicKey.ToString())
+        {
+            isLeftWinner = false;
+        }
+        else
+        {
+            // Random winner
+            isLeftWinner = UnityEngine.Random.value >= 0.5f;
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        yield return StartCoroutine(DoAttackVisuals(true, isLeftWinner));
+
+        if (!isLeftWinner) 
+        {
+            yield return new WaitForSeconds(1f);
+
+            yield return StartCoroutine(DoAttackVisuals(false, !isLeftWinner));
+        }
+
+        yield return new WaitForSeconds(2f);       
+    }
+
+    public void RemoveFromCrowd(BrawlerData data)
+    {
+        GameObject brawler = crowd.FirstOrDefault(b => b.GetComponent<BrawlerCharacter>().MyBrawlerData == data);
+
+        if (brawler != null)
+        {
+            brawler.SetActive(false);
         }
     }
 
@@ -136,6 +245,9 @@ public class BrawlController : Window
         brawlerLeft.GetComponent<BrawlerCharacter>().SetBrawlerData(this.firstBrawler);
         brawlerRight.GetComponent<BrawlerCharacter>().SetBrawlerData(this.secondBrawler);
 
+        brawlerLeft.GetComponent<BrawlerCharacter>().SetDeath(false);
+        brawlerRight.GetComponent<BrawlerCharacter>().SetDeath(false);
+
         if (fightSequence != null)
         {
             StopCoroutine(fightSequence);
@@ -151,6 +263,8 @@ public class BrawlController : Window
         yield return new WaitForSeconds(0.8f);
 
         PlayVersus(firstBrawler, secondBrawler);
+
+        readyForFight = true;
     }
 
     private void PlayVersus(BrawlerData leftBrawler, BrawlerData rightBrawler)
@@ -185,7 +299,7 @@ public class BrawlController : Window
                 StopCoroutine(leftPlayerRoutine);
             }
 
-            leftPlayerRoutine = StartCoroutine(DoMeleeAttackVisuals(true));
+            leftPlayerRoutine = StartCoroutine(DoAttackVisuals(true, false));
         }
         else
         {
@@ -194,7 +308,7 @@ public class BrawlController : Window
                 StopCoroutine(rightPlayerRoutine);
             }
 
-            rightPlayerRoutine = StartCoroutine(DoMeleeAttackVisuals(false));
+            rightPlayerRoutine = StartCoroutine(DoAttackVisuals(false, false));
         }
     }
 
@@ -253,12 +367,13 @@ public class BrawlController : Window
         brawler.position = end;
     }
 
-    IEnumerator DoMeleeAttackVisuals(bool isLeftPlayer)
+    IEnumerator DoAttackVisuals(bool isLeftPlayer, bool targetDies)
     {
         float elapsedTime = 0;
         bool shouldMove = false;
 
         Transform brawler = isLeftPlayer ? brawlerLeft.transform : brawlerRight.transform;
+        Transform opponentBrawler = isLeftPlayer ? brawlerRight.transform : brawlerLeft.transform;
 
         BrawlerCharacter brawlerCharacter = brawler.GetComponent<BrawlerCharacter>();
 
@@ -285,6 +400,11 @@ public class BrawlController : Window
         brawlerCharacter.DoAttack();
 
         yield return new WaitForSeconds(attackDuration);
+
+        if (targetDies)
+        {
+            opponentBrawler.GetComponent<BrawlerCharacter>().SetDeath(true);
+        }
 
         elapsedTime = 0;
 

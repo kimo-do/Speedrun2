@@ -836,6 +836,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: blze_death_sheet_34
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8108a59b04af0f42b807027d3170255
+      internalID: 2112028454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blze_death_sheet_35
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a04d129b6c50f974e840999c60e02071
+      internalID: 1278633140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -875,6 +917,8 @@ TextureImporter:
       blze_death_sheet_31: -1556902302
       blze_death_sheet_32: 1852069191
       blze_death_sheet_33: -661514661
+      blze_death_sheet_34: 2112028454
+      blze_death_sheet_35: 1278633140
       blze_death_sheet_4: -183457417
       blze_death_sheet_5: -2131520362
       blze_death_sheet_6: 556301876
