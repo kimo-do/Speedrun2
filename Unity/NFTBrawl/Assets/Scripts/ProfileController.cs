@@ -106,7 +106,12 @@ public class ProfileController : Window
 
     private void ClickedCreateBrawl()
     {
-        BrawlAnchorService.Instance.StartBrawl();
+        BrawlAnchorService.Instance.StartBrawl(OnBrawlCreated);
+    }
+
+    private void OnBrawlCreated()
+    {
+
     }
 
     private void ClickedJoinLobby()
