@@ -861,6 +861,7 @@ public class BrawlAnchorService : MonoBehaviour
             Brawl = brawlPDA,
             Payer = Web3.Account.PublicKey,
             SystemProgram = SystemProgram.ProgramIdKey,
+            SlotHashes = new PublicKey("SysvarS1otHashes111111111111111111111111111"),
         };
 
         var initTx = DeathbattleProgram.RunMatch(rmAccounts, BrawlAnchorService.AnchorProgramIdPubKey);
@@ -881,8 +882,8 @@ public class BrawlAnchorService : MonoBehaviour
             }
         }
 
-        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "revive_clone",
-            () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
+        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "run_match",
+            () => { Debug.Log("Run Match was successful"); }, s => { Debug.LogError("Run Match was not successful"); });
     }
 
     public async void ClearEndedBrawl(bool useSession, Action onSuccess, PublicKey brawlPDA, PublicKey winner)
