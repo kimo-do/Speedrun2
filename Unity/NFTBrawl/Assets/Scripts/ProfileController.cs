@@ -122,11 +122,11 @@ public class ProfileController : Window
 
             if (GameScreen.instance.selectedCharacter != null)
             {
-                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.ownerKey;
+                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.brawlerKey;
             }
             else
             {
-                myBrawler = GameScreen.instance.MyBrawlers[0].ownerKey;
+                myBrawler = GameScreen.instance.MyBrawlers[0].brawlerKey;
             }
 
             if (myBrawler != null)
