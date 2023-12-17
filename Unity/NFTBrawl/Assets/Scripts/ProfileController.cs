@@ -62,7 +62,8 @@ public class ProfileController : Window
         joinOpenLobbyButton.gameObject.SetActive(false);
         joinOpenLobbyButton.interactable = false;
         createNewBrawl.gameObject.SetActive(false);
-        createNewBrawl.interactable = false;    
+        createNewBrawl.interactable = false;
+        labButton2.interactable = false;
 
 
         if (GameScreen.instance.MyBrawlers.Count > 0)
@@ -70,12 +71,14 @@ public class ProfileController : Window
             if (AttemptedJoinLobby == null)
             {
                 joinOpenLobbyButton.interactable = true;
+                labButton2.interactable = true;
             }
             createNewBrawl.interactable = true;
         }
 
         if (AttemptedJoinLobby != null)
         {
+            FetchLobbyCount();
             infoLabel.text = "Waiting for other players..";
         }
         else if (GameScreen.instance.PendingJoinableBrawls.Count > 0)
@@ -83,11 +86,29 @@ public class ProfileController : Window
             openLobby.gameObject.SetActive(true);
             joinOpenLobbyButton.gameObject.SetActive(true);
             infoLabel.text = "Pending brawl found:";
+            labButton2.interactable = true;
+
         }
         else
         {
+            labButton2.interactable = true;
             createNewBrawl.gameObject.SetActive(true);
             infoLabel.text = "There is no pending brawl.";
+        }
+    }
+
+    private async void FetchLobbyCount()
+    {
+        if (AttemptedJoinLobby == null) return;
+
+        Brawl awaitingBrawl = await BrawlAnchorService.Instance.FetchBrawl(AttemptedJoinLobby);
+
+        if (awaitingBrawl != null)
+        {
+            if (AttemptedJoinLobby != null)
+            {
+                infoLabel.text = $"Waiting for other players.. {awaitingBrawl.Queue.Length}/8";
+            }
         }
     }
 
@@ -143,6 +164,7 @@ public class ProfileController : Window
                 BrawlAnchorService.Instance.JoinBrawl(AttemptedJoinLobby, myBrawler);
                 infoLabel.text = "Waiting for other players..";
                 joinOpenLobbyButton.interactable = false;
+                labButton2.interactable = false;
             }
             else
             {
@@ -164,7 +186,6 @@ public class ProfileController : Window
     private void OnActiveLobbyFound(PublicKey lobbyPubkey)
     {
         // attempt to start all active lobbies found
-
         if (GameScreen.instance.ReadyToStartBrawls.Count > 0)
         {
             Debug.Log($"Attempting to start all ({GameScreen.instance.ReadyToStartBrawls.Count}) brawls.");
@@ -320,6 +341,7 @@ public class ProfileController : Window
                 if (AttemptedJoinLobby == null)
                 {
                     joinOpenLobbyButton.interactable = true;
+                    labButton2.interactable = true;
                 }
                 createNewBrawl.interactable = true;
             }
