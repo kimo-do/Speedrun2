@@ -8,6 +8,7 @@ public class BrawlerCharacter : MonoBehaviour
 {
     public List<VisualBrawlerData> visualBrawlers;
     public Animator abilityAnimator;
+    public GameObject selection;
 
     private VisualBrawlerData myVisualBrawler;
     private Animator animator;
@@ -25,6 +26,18 @@ public class BrawlerCharacter : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
+    }
+
+    public void ToggleSelected(bool selected)
+    {
+        if (selected)
+        {
+            selection.SetActive(true);
+        }
+        else
+        {
+            selection.SetActive(false);
+        }
     }
 
     public void SetBrawlerData(BrawlerData brawlerData)

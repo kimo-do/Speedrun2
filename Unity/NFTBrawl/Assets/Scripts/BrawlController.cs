@@ -1,13 +1,16 @@
 using Solana.Unity.Wallet;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BrawlController : Window
 {
+
     public GameObject brawlerLeft;
     public GameObject brawlerRight;
 
@@ -29,6 +32,7 @@ public class BrawlController : Window
     public float attackDuration = 1f;
 
     [Header("UI")]
+    public Button closeBrawl;
     public Animation versusAnim;
     public Animation resultAnim;
 
@@ -52,6 +56,13 @@ public class BrawlController : Window
     public override void Awake()
     {
         base.Awake();
+
+        closeBrawl.onClick.AddListener(CloseBrawlClicked);
+    }
+
+    private void CloseBrawlClicked()
+    {
+        GameScreen.instance.OpenProfile();
     }
 
     public override void Toggle(bool toggle)
@@ -142,6 +153,7 @@ public class BrawlController : Window
     }
 
     private bool readyForFight = false;
+    private bool leftFighterDied = false;
 
     IEnumerator c_PlayoutFights()
     {
@@ -149,17 +161,39 @@ public class BrawlController : Window
 
         yield return new WaitForSeconds(1f);
 
-        while(brawlerLineup.Count > 1)
+        bool isFirstFight = true;
+        leftFighterDied = false;
+        readyForFight = false;
+
+        while (brawlerLineup.Count > 1)
         {
             readyForFight = false;
 
-            BrawlerData fighter1 = brawlerLineup.Dequeue();
-            BrawlerData fighter2 = brawlerLineup.Dequeue();
+            if (isFirstFight)
+            {
+                BrawlerData fighter1 = brawlerLineup.Dequeue();
+                BrawlerData fighter2 = brawlerLineup.Dequeue();
 
-            RemoveFromCrowd(fighter1);
-            RemoveFromCrowd(fighter2);
+                RemoveFromCrowd(fighter1);
+                RemoveFromCrowd(fighter2);
 
-            InitFightSequence(fighter1, fighter2);
+                InitFightSequence(fighter1, fighter2);
+
+                isFirstFight = false;
+            }
+            else
+            {
+                BrawlerData newFighter = brawlerLineup.Dequeue();
+
+                if (leftFighterDied)
+                {
+                    InitFightSequence(newFighter, this.secondBrawler);
+                }
+                else
+                {
+                    InitFightSequence(this.firstBrawler, newFighter);
+                }
+            }
 
             yield return new WaitUntil(() => readyForFight == true);
 
@@ -197,14 +231,16 @@ public class BrawlController : Window
 
         yield return new WaitForSeconds(2f);
 
-        yield return StartCoroutine(DoAttackVisuals(true, isLeftWinner));
-
-        if (!isLeftWinner) 
+        if (isLeftWinner)
         {
-            yield return new WaitForSeconds(1f);
-
+            yield return StartCoroutine(DoAttackVisuals(true, isLeftWinner));
+        }
+        else
+        {
             yield return StartCoroutine(DoAttackVisuals(false, !isLeftWinner));
         }
+
+        leftFighterDied = isLeftWinner == false;
 
         yield return new WaitForSeconds(2f);       
     }

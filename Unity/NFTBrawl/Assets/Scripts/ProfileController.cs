@@ -1,3 +1,4 @@
+using Solana.Unity.SDK;
 using Solana.Unity.Wallet;
 using System;
 using System.Collections;
@@ -22,6 +23,8 @@ public class ProfileController : Window
     public Button labButton1;
     public Button labButton2;
     public Button joinOpenLobbyButton;
+    public Button createNewBrawl;
+    public bool isShowingProfile;
 
     public override void Awake()
     {
@@ -40,6 +43,8 @@ public class ProfileController : Window
         {
             yourBrawlers.gameObject.SetActive(false);
         }
+
+        isShowingProfile = toggle;
     }
 
     private void UpdateProfileView()
@@ -48,6 +53,7 @@ public class ProfileController : Window
         openLobby.gameObject.SetActive(false);
         joinOpenLobbyButton.gameObject.SetActive(false);
         joinOpenLobbyButton.interactable = false;
+        createNewBrawl.gameObject.SetActive(true);
 
         if (gameObjects.Count > 0)
         {
@@ -69,17 +75,41 @@ public class ProfileController : Window
         labButton1.onClick.AddListener(ClickedOpenLab);
         labButton2.onClick.AddListener(ClickedOpenLab);
         joinOpenLobbyButton.onClick.AddListener(ClickedJoinLobby);
+        createNewBrawl.onClick.AddListener(ClickedCreateBrawl);
 
         //PositionGameObjects();
         noBrawlers.gameObject.SetActive(true);
         yourBrawlers.gameObject.SetActive(true);
     }
 
+    private void ClickedCreateBrawl()
+    {
+        BrawlAnchorService.Instance.StartBrawl();
+    }
+
     private void ClickedJoinLobby()
     {
         if (GameScreen.instance.PendingLobby != null)
         {
+            PublicKey myBrawler = null;
 
+            if (GameScreen.instance.selectedCharacter != null)
+            {
+                myBrawler = GameScreen.instance.selectedCharacter.MyBrawlerData.publicKey;
+            }
+            else
+            {
+                myBrawler = GameScreen.instance.MyBrawlers[0].publicKey;
+            }
+
+            if (myBrawler != null)
+            {
+                BrawlAnchorService.Instance.JoinBrawl(GameScreen.instance.PendingLobby, myBrawler);
+            }
+            else
+            {
+                GameScreen.instance.ShowError("No brawlers available!", 2f);
+            }
         }
     }
 

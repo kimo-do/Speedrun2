@@ -67,6 +67,7 @@ public class BrawlAnchorService : MonoBehaviour
     public PublicKey CloneLabPDA;
     public PublicKey ColosseumPDA;
     public PublicKey GraveyardPDA;
+    public PublicKey BrawlPDA;
     private bool _isInitialized;
     private DeathbattleClient anchorClient;
     private int blockingTransactionsInProgress;
@@ -594,7 +595,7 @@ public class BrawlAnchorService : MonoBehaviour
         Debug.Log("Session closed");
     }
 
-    public async void StartBrawl(PublicKey brawlPDA)
+    public async void StartBrawl()
     {
         var transaction = new Transaction()
         {
@@ -603,9 +604,13 @@ public class BrawlAnchorService : MonoBehaviour
             RecentBlockHash = await Web3.BlockHash(maxSeconds: 15)
         };
 
+        PublicKey.TryFindProgramAddress(new[]
+               {Encoding.UTF8.GetBytes("brawler"), ColosseumPDA.KeyBytes, BitConverter.GetBytes(CurrentColosseum.NumBrawls - 1)},
+           AnchorProgramIdPubKey, out BrawlPDA, out byte brawlBump);
+
         StartBrawlAccounts startBrawlAccounts = new StartBrawlAccounts
         {
-            Brawl = brawlPDA,
+            Brawl = BrawlPDA,
             Colosseum = ColosseumPDA,
             Payer = Web3.Account,
             SystemProgram = SystemProgram.ProgramIdKey
@@ -615,6 +620,36 @@ public class BrawlAnchorService : MonoBehaviour
         transaction.Add(startBrawlIX);
         Debug.Log("Sign and send start brawl");
         await SendAndConfirmTransaction(Web3.Wallet, transaction, "Start brawl.");
+    }
+
+    public async void JoinBrawl(PublicKey brawlPDA, PublicKey brawler)
+    {
+        var transaction = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash(maxSeconds: 15)
+        };
+
+        JoinBrawlAccounts joinBrawlAccounts = new JoinBrawlAccounts
+        {
+            Brawl = brawlPDA,
+            Brawler = brawler,
+            CloneLab = CloneLabPDA,
+            Colosseum = ColosseumPDA,
+            Payer = Web3.Account,
+            SystemProgram = SystemProgram.ProgramIdKey
+        };
+
+        JoinBrawlArgs joinBrawlArgs = new JoinBrawlArgs()
+        {
+            Brawler = brawler
+        };
+
+        var startBrawlIX = DeathbattleProgram.JoinBrawl(joinBrawlAccounts, joinBrawlArgs, AnchorProgramIdPubKey);
+        transaction.Add(startBrawlIX);
+        Debug.Log("Sign and send join brawl");
+        await SendAndConfirmTransaction(Web3.Wallet, transaction, "Join brawl.");
     }
 
     //public async void JoinBrawl(bool useSession, PublicKey brawler, PublicKey pendingBrawlLobby, Action onSuccess)

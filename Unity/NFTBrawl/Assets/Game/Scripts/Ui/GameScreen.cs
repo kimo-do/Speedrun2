@@ -17,6 +17,7 @@ using Deathbattle.Program;
 using Solana.Unity.Programs;
 using Solana.Unity.Wallet;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// This is the screen which handles the interaction with the anchor program.
@@ -212,6 +213,43 @@ public class GameScreen : MonoBehaviour
         {
             OpenBrawl();
         }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = SuperCamera.instance.Camera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.transform != null)
+                {
+                    if (hit.transform.TryGetComponent(out BrawlerCharacter character))
+                    {
+                        if (MyBrawlers.Contains(character.MyBrawlerData))
+                        {
+                            if (profileScreen.isShowingProfile)
+                            {
+                                ClickedBrawler(character);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public BrawlerCharacter selectedCharacter;
+
+    private void ClickedBrawler(BrawlerCharacter character)
+    {
+        foreach (var brawl in profileScreen.gameObjects)
+        {
+            brawl.GetComponent<BrawlerCharacter>().ToggleSelected(false);
+        }
+
+        character.ToggleSelected(true);
+
+        selectedCharacter = character;
     }
 
     public void OpenLab()
@@ -346,16 +384,79 @@ public class GameScreen : MonoBehaviour
 
         Debug.Log($"Finished fetching all brawlers: {MyBrawlers.Count}");
 
-        if (MyBrawlers.Count > 0)
-        {
-            Debug.Log("MY BRAWLER:");
-            Debug.Log($"-- {MyBrawlers[0].characterType}");
-            Debug.Log($"-- {MyBrawlers[0].brawlerType}");
-            Debug.Log($"-- {MyBrawlers[0].username}");
-        }
+        //if (MyBrawlers.Count > 0)
+        //{
+        //    Debug.Log("MY BRAWLER:");
+        //    Debug.Log($"-- {MyBrawlers[0].characterType}");
+        //    Debug.Log($"-- {MyBrawlers[0].brawlerType}");
+        //    Debug.Log($"-- {MyBrawlers[0].username}");
+        //}
 
         BrawlersRetrieved?.Invoke();
     }
+
+    //private async void FetchAllPendingBrawls(Colosseum colosseum)
+    //{
+    //    if (colosseum == null) return;
+    //    if (colosseum.PendingBrawls.Length < 1) return;
+
+    //    List<Brawl> pendingBrawls = await BrawlAnchorService.Instance.FetchAllPendingBrawls(colosseum);
+
+    //    if (pendingBrawls != null)
+    //    {
+    //        Debug.Log($"Finished fetching all pending brawls: {pendingBrawls.Count}");
+    //        if (pendingBrawls.Count > 0)
+    //        {
+    //            Brawl firstLobby = pendingBrawls[0];
+
+    //            LobbyData lobbyData = new LobbyData()
+    //            {
+    //                firstLobby.
+    //            };
+    //            //PendingLobbiesRetrieved?.Invoke()
+
+    //        }
+    //    }
+
+    //    foreach (var brawl in currentCloneLab.Brawlers)
+    //    {
+    //        if (!myBrawlersPubKeys.Contains(brawl))
+    //        {
+    //            myBrawlersPubKeys.Add(brawl);
+
+    //            Brawler fetchedBrawler = await BrawlAnchorService.Instance.FetchBrawler(brawl);
+
+    //            if (fetchedBrawler != null)
+    //            {
+    //                int brawlIntType = (int)fetchedBrawler.BrawlerType;
+    //                int charIntType = (int)fetchedBrawler.CharacterType;
+    //                string brawlName = fetchedBrawler.Name;
+
+    //                BrawlerData brawlerData = new BrawlerData()
+    //                {
+    //                    brawlerType = (BrawlerData.BrawlerType)brawlIntType,
+    //                    characterType = (BrawlerData.CharacterType)charIntType,
+    //                    username = fetchedBrawler.Name,
+    //                    publicKey = fetchedBrawler.Owner,
+    //                };
+
+    //                myBrawlers.Add(brawlerData);
+    //            }
+    //        }
+    //    }
+
+    //    Debug.Log($"Finished fetching all brawlers: {MyBrawlers.Count}");
+
+    //    //if (MyBrawlers.Count > 0)
+    //    //{
+    //    //    Debug.Log("MY BRAWLER:");
+    //    //    Debug.Log($"-- {MyBrawlers[0].characterType}");
+    //    //    Debug.Log($"-- {MyBrawlers[0].brawlerType}");
+    //    //    Debug.Log($"-- {MyBrawlers[0].username}");
+    //    //}
+
+    //    BrawlersRetrieved?.Invoke();
+    //}
 
     private void UpdateContent()
     {
