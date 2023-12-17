@@ -69,7 +69,7 @@ public class ProfileController : Window
             createNewBrawl.interactable = true;
         }
 
-        if (GameScreen.instance.PendingLobby != null)
+        if (GameScreen.instance.PendingJoinableBrawls.Count > 0)
         {
             openLobby.gameObject.SetActive(true);
             joinOpenLobbyButton.gameObject.SetActive(true);
@@ -105,7 +105,7 @@ public class ProfileController : Window
 
     private void ClickedJoinLobby()
     {
-        if (GameScreen.instance.PendingLobby != null)
+        if (GameScreen.instance.PendingJoinableBrawls.Count > 0)
         {
             PublicKey myBrawler = null;
 
@@ -121,8 +121,8 @@ public class ProfileController : Window
             if (myBrawler != null)
             {
                 GameScreen.instance.HoldWalletUpdates = true;
-                AttemptedJoinLobby = GameScreen.instance.PendingLobby;
-                BrawlAnchorService.Instance.JoinBrawl(GameScreen.instance.PendingLobby, myBrawler);
+                AttemptedJoinLobby = GameScreen.instance.PendingJoinableBrawls[0];
+                BrawlAnchorService.Instance.JoinBrawl(AttemptedJoinLobby, myBrawler);
             }
             else
             {
@@ -218,12 +218,15 @@ public class ProfileController : Window
 
             foreach (BrawlerData myBrawler in GameScreen.instance.MyBrawlers)
             {
-                GameObject newBrawler = Instantiate(GameScreen.instance.brawlerPfb, brawlerContainer);
-                if (myBrawler != null)
+                if (gameObjects.Count < 9)
                 {
-                    newBrawler.GetComponent<BrawlerCharacter>().SetBrawlerData(myBrawler);
+                    GameObject newBrawler = Instantiate(GameScreen.instance.brawlerPfb, brawlerContainer);
+                    if (myBrawler != null)
+                    {
+                        newBrawler.GetComponent<BrawlerCharacter>().SetBrawlerData(myBrawler);
+                    }
+                    gameObjects.Add(newBrawler);
                 }
-                gameObjects.Add(newBrawler);
             }
 
             PositionGameObjects();

@@ -70,13 +70,13 @@ public class GameScreen : MonoBehaviour
     public Action<Solana.Unity.Wallet.PublicKey> PendingLobbyRetrieved;
     public Action<Solana.Unity.Wallet.PublicKey> ActiveLobbyRetrieved;
 
-    public Solana.Unity.Wallet.PublicKey PendingLobby;
-
     private List<BrawlerData> myBrawlers = new();
     private List<PublicKey> myBrawlersPubKeys = new();
 
     private List<BrawlerData> activeGameBrawlers = new();
     private PublicKey activeGameWinner;
+
+    private List<PublicKey> pendingJoinableBrawls = new();
 
     private bool initialSubcribed;
     private Coroutine errorRoutine;
@@ -87,6 +87,7 @@ public class GameScreen : MonoBehaviour
 
     public bool IsPlayingOutBattle { get; set; }
     public bool HoldWalletUpdates { get; set; }
+    public List<PublicKey> PendingJoinableBrawls { get => pendingJoinableBrawls; set => pendingJoinableBrawls = value; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
@@ -217,8 +218,8 @@ public class GameScreen : MonoBehaviour
 
             if (colosseum.PendingBrawls.Length > 0)
             {
-                PendingLobby = colosseum.PendingBrawls[0];
-                PendingLobbyRetrieved?.Invoke(colosseum.PendingBrawls[0]);
+                pendingJoinableBrawls = new(colosseum.PendingBrawls);
+                PendingLobbyRetrieved?.Invoke(pendingJoinableBrawls[0]);
             }
             else
             {
@@ -226,6 +227,62 @@ public class GameScreen : MonoBehaviour
             }
         }
     }
+
+    //private async void FetchAllPendingBrawls(Colosseum colosseum)
+    //{
+    //    List<Brawl> pendingBrawls = await BrawlAnchorService.Instance.FetchAllPendingBrawls(colosseum);
+
+    //    List<PublicKey> readyToStartBrawls = new();
+    //    List<PublicKey> readyToJoinBrawls = new();
+
+    //    if (pendingBrawls != null)
+    //    {
+    //        if (pendingBrawls.Count > 0)
+    //        {
+    //            foreach (var pendingBrawl in pendingBrawls)
+    //            {
+    //                if (pendingBrawl.Queue != null)
+    //                {
+    //                    if (pendingBrawl.Queue.Length == 8)
+    //                    {
+    //                        readyToStartBrawls.Add(pendingBrawl);
+    //                    }
+    //                    else if (pendingBrawl.Queue.Length < 8)
+    //                    {
+    //                        readyToJoinBrawls.Add(pendingBrawl);
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    foreach (var brawl in readyToStartBrawls)
+    //    {
+    //        // Start full pending brawls
+    //    }
+
+    //    pendingJoinableBrawls = new();
+
+    //    Debug.Log($"Finished fetching all pending brawls: {pendingBrawls.Count}");
+    //    Debug.Log($"Ready to join brawls: {readyToJoinBrawls.Count}");
+    //    Debug.Log($"Ready to start brawls: {readyToStartBrawls.Count}");
+
+    //    if (pendingJoinableBrawls.Count > 0)
+    //    {
+    //        PendingLobby = pendingJoinableBrawls[0];
+    //        PendingLobbyRetrieved?.Invoke(colosseum.PendingBrawls[0]);
+    //    }
+
+    //    //if (MyBrawlers.Count > 0)
+    //    //{
+    //    //    Debug.Log("MY BRAWLER:");
+    //    //    Debug.Log($"-- {MyBrawlers[0].characterType}");
+    //    //    Debug.Log($"-- {MyBrawlers[0].brawlerType}");
+    //    //    Debug.Log($"-- {MyBrawlers[0].username}");
+    //    //}
+
+    //    BrawlersRetrieved?.Invoke();
+    //}
 
     private void OnGraveyardChanged(Graveyard graveyard)
     {
