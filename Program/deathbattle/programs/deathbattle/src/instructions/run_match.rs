@@ -1,4 +1,5 @@
 use anchor_lang::{prelude::*, solana_program};
+use solana_program::{program::invoke, system_instruction};
 
 use crate::{error::BrawlError, rand_choice, Brawl, CloneLab, Colosseum, Graveyard};
 
@@ -7,9 +8,9 @@ pub struct RunMatch<'info> {
     /// The Clone Lab account. The winner will go back here.
     #[account(
         mut,
-        realloc=clone_lab.len() + 32,
-        realloc::payer=payer,
-        realloc::zero=false
+        // realloc=clone_lab.len() + 32,
+        // realloc::payer=payer,
+        // realloc::zero=false
     )]
     pub clone_lab: Account<'info, CloneLab>,
 
@@ -20,9 +21,9 @@ pub struct RunMatch<'info> {
     /// The Graveyard account. The losing clones will go here.
     #[account(
         mut,
-        realloc=graveyard.len() + (32 * 7),
-        realloc::payer=payer,
-        realloc::zero=false
+        // realloc=graveyard.len() + (32 * 7),
+        // realloc::payer=payer,
+        // realloc::zero=false
     )]
     pub graveyard: Account<'info, Graveyard>,
 
@@ -93,6 +94,45 @@ impl<'info> RunMatch<'info> {
             err!(BrawlError::InvalidBrawl)?;
         }
 
+        resize_or_reallocate_account_raw(
+            &ctx.accounts.clone_lab.to_account_info(),
+            &ctx.accounts.payer.to_account_info(),
+            &ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.clone_lab.len() + 32,
+        )?;
+
+        resize_or_reallocate_account_raw(
+            &ctx.accounts.graveyard.to_account_info(),
+            &ctx.accounts.payer.to_account_info(),
+            &ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.clone_lab.len() + (32 * 7),
+        )?;
+
         Ok(())
     }
+}
+
+/// Resize an account using realloc, lifted from Solana Cookbook
+pub fn resize_or_reallocate_account_raw<'a>(
+    target_account: &AccountInfo<'a>,
+    funding_account: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    new_size: usize,
+) -> Result<()> {
+    let rent = Rent::get()?;
+    let new_minimum_balance = rent.minimum_balance(new_size);
+
+    let lamports_diff = new_minimum_balance.saturating_sub(target_account.lamports());
+    invoke(
+        &system_instruction::transfer(funding_account.key, target_account.key, lamports_diff),
+        &[
+            funding_account.clone(),
+            target_account.clone(),
+            system_program.clone(),
+        ],
+    )?;
+
+    target_account.realloc(new_size, false)?;
+
+    Ok(())
 }

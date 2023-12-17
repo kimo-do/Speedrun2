@@ -40,7 +40,7 @@ impl<'info> ClearEndedBrawl<'info> {
             .iter()
             .position(|value| *value == ctx.accounts.brawl.key())
         {
-            ctx.accounts.colosseum.active_brawls.swap_remove(index);
+            ctx.accounts.colosseum.ended_brawls.swap_remove(index);
         } else {
             return err!(BrawlError::InvalidBrawl);
         }
