@@ -32,6 +32,11 @@ impl<'info> StartBrawl<'info> {
 
         ctx.accounts.colosseum.num_brawls += 1;
 
+        ctx.accounts
+            .colosseum
+            .pending_brawls
+            .push(ctx.accounts.brawl.key());
+
         Ok(())
     }
 }
