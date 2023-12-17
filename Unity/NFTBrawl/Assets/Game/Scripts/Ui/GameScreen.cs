@@ -81,6 +81,8 @@ public class GameScreen : MonoBehaviour
     private List<PublicKey> pendingJoinableBrawls = new();
     private List<PublicKey> readyToStartBrawls = new();
     private List<PublicKey> endedBrawls = new();
+    private List<PublicKey> attemptedToStartBrawls = new();
+
 
     private bool initialSubcribed;
     private Coroutine errorRoutine;
@@ -96,6 +98,7 @@ public class GameScreen : MonoBehaviour
     public List<PublicKey> EndedBrawls { get => endedBrawls; set => endedBrawls = value; }
     public List<PublicKey> MyBrawlersPubKeys { get => myBrawlersPubKeys; set => myBrawlersPubKeys = value; }
     public PublicKey ActivePlayingBrawl { get => activePlayingBrawl; set => activePlayingBrawl = value; }
+    public List<PublicKey> AttemptedToStartBrawls { get => attemptedToStartBrawls; set => attemptedToStartBrawls = value; }
 
     // The PDAs
     public PublicKey BrawlerPDA;
@@ -348,7 +351,10 @@ public class GameScreen : MonoBehaviour
                     {
                         if (profileScreen.isShowingProfile)
                         {
-                            ClickedBrawler(character);
+                            if (profileScreen.AttemptedJoinLobby == null)
+                            {
+                                ClickedBrawler(character);
+                            }
                         }
                     }
                 }
@@ -652,6 +658,11 @@ public class GameScreen : MonoBehaviour
         AttemptCreateAsync();
     }
 
+    public void AttemptReviveBrawler()
+    {
+        AttemptReviveAsync();
+    }
+
     private double solBalance = 0;
 
     private async void AttemptCreateAsync()
@@ -661,17 +672,23 @@ public class GameScreen : MonoBehaviour
         MainThreadDispatcher.Instance().Enqueue(ContinueCreateBrawler);
     }
 
+    private async void AttemptReviveAsync()
+    {
+        solBalance = await Web3.Instance.WalletBase.GetBalance();
+
+        MainThreadDispatcher.Instance().Enqueue(ContinueReviveBrawler);
+    }
+
     private void ContinueCreateBrawler()
     {
         if (BrawlAnchorService.Instance.CurrentProfile != null)
         {
             if (solBalance >= 0.1)
             {
-                GraveyardController.Instance.SummonEffect();
-
                 BrawlAnchorService.Instance.CreateBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
                 {
                     // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
+                    GraveyardController.Instance.SummonEffect();
                     Debug.Log("Created a brawler!");
                 });
             }
@@ -686,8 +703,27 @@ public class GameScreen : MonoBehaviour
         }
     }
 
-    public void AttemptReviveBrawler()
+    private void ContinueReviveBrawler()
     {
-        GraveyardController.Instance.SummonEffect();
+        if (BrawlAnchorService.Instance.CurrentProfile != null)
+        {
+            if (solBalance >= 0.05)
+            {
+                BrawlAnchorService.Instance.ReviveBrawler(!Web3.Rpc.NodeAddress.AbsoluteUri.Contains("localhost"), () =>
+                {
+                    // Do something with the result. The websocket update in onPlayerDataChanged will come a bit earlier
+                    GraveyardController.Instance.SummonEffect();
+                    Debug.Log("Revived a brawler!");
+                });
+            }
+            else
+            {
+                ShowError("Insufficient Sol Balance!", 2f);
+            }
+        }
+        else
+        {
+            ShowError("No user profile found!", 2f);
+        }
     }
 }
