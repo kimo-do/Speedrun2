@@ -10,6 +10,10 @@ pub enum CharacterType {
     Female1,
     Bonki,
     SolBlaze,
+    Male2,
+    Female2,
+    Cop,
+    Gangster,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, EnumIter)]
