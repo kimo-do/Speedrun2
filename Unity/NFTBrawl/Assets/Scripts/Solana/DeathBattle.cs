@@ -673,6 +673,12 @@ namespace Deathbattle
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
+        public async Task<RequestResult<string>> SendClearEndedBrawlAsync(ClearEndedBrawlAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.ClearEndedBrawl(accounts, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
         protected override Dictionary<uint, ProgramError<DeathbattleErrorKind>> BuildErrorsDictionary()
         {
             return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NameTooLong, "Name too long.")}, {6004U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawl, "Invalid Brawl.")}, {6005U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidOwner, "Invalid Owner of the Brawler.")}, {6006U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NumericalOverflowError, "Numerical overflow error.")}, {6007U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.WinnerNotDetermined, "Winner not determined")}, };
@@ -795,6 +801,19 @@ namespace Deathbattle
             public PublicKey Account { get; set; }
 
             public PublicKey Payer { get; set; }
+        }
+
+        public class ClearEndedBrawlAccounts
+        {
+            public PublicKey Colosseum { get; set; }
+
+            public PublicKey Brawl { get; set; }
+
+            public PublicKey Payer { get; set; }
+
+            public PublicKey Authority { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
         }
 
         public static class DeathbattleProgram
@@ -925,6 +944,19 @@ namespace Deathbattle
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(1749686311319895933UL, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ClearEndedBrawl(ClearEndedBrawlAccounts accounts, PublicKey programId)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Colosseum, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Authority, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(7537756438295858546UL, offset);
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
