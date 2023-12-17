@@ -31,6 +31,8 @@ namespace Deathbattle
 
             public PublicKey[] Queue { get; set; }
 
+            public PublicKey Winner { get; set; }
+
             public Match[] Matches { get; set; }
 
             public static Brawl Deserialize(ReadOnlySpan<byte> _data)
@@ -55,6 +57,8 @@ namespace Deathbattle
                     offset += 32;
                 }
 
+                result.Winner = _data.GetPubKey(offset);
+                offset += 32;
                 int resultMatchesLength = (int)_data.GetU32(offset);
                 offset += 4;
                 result.Matches = new Match[resultMatchesLength];
@@ -271,7 +275,8 @@ namespace Deathbattle
             NameTooLong = 6003U,
             InvalidBrawl = 6004U,
             InvalidOwner = 6005U,
-            NumericalOverflowError = 6006U
+            NumericalOverflowError = 6006U,
+            WinnerNotDetermined = 6007U
         }
     }
 
@@ -643,7 +648,7 @@ namespace Deathbattle
 
         protected override Dictionary<uint, ProgramError<DeathbattleErrorKind>> BuildErrorsDictionary()
         {
-            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NameTooLong, "Name too long.")}, {6004U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawl, "Invalid Brawl.")}, {6005U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidOwner, "Invalid Owner of the Brawler.")}, {6006U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NumericalOverflowError, "Numerical overflow error.")}, };
+            return new Dictionary<uint, ProgramError<DeathbattleErrorKind>>{{6000U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.BrawlFull, "The Brawl is full.")}, {6001U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.MissingBrawlerAccounts, "Missing Brawler accounts.")}, {6002U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawler, "Invalid Brawler.")}, {6003U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NameTooLong, "Name too long.")}, {6004U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidBrawl, "Invalid Brawl.")}, {6005U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.InvalidOwner, "Invalid Owner of the Brawler.")}, {6006U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.NumericalOverflowError, "Numerical overflow error.")}, {6007U, new ProgramError<DeathbattleErrorKind>(DeathbattleErrorKind.WinnerNotDetermined, "Winner not determined")}, };
         }
     }
 
@@ -728,9 +733,17 @@ namespace Deathbattle
 
         public class RunMatchAccounts
         {
+            public PublicKey CloneLab { get; set; }
+
+            public PublicKey Graveyard { get; set; }
+
             public PublicKey Brawl { get; set; }
 
             public PublicKey Payer { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
+
+            public PublicKey SlotHashes { get; set; }
         }
 
         public static class DeathbattleProgram
@@ -831,7 +844,7 @@ namespace Deathbattle
             public static Solana.Unity.Rpc.Models.TransactionInstruction RunMatch(RunMatchAccounts accounts, PublicKey programId)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Graveyard, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawl, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SlotHashes, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(10808022854363113096UL, offset);

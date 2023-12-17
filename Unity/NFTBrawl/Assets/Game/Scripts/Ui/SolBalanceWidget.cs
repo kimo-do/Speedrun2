@@ -21,9 +21,12 @@ namespace Game.Scripts.Ui
         private double lamportsChange;
         private Coroutine disableSolChangeCoroutine;
         private double currentLamports;
+        private AudioSource audioSource;
 
         private void Awake()
         {
+            audioSource = GetComponent<AudioSource>();
+
             if (CopyAddressButton)
             {
                 CopyAddressButton.onClick.AddListener(OnCopyClicked);
@@ -70,6 +73,11 @@ namespace Game.Scripts.Ui
 
                     SolChangeText.text = "<color=green>+" + lamportsChange.ToString("F2") + "</color> ";
                     disableSolChangeCoroutine = StartCoroutine(DisableSolChangeDelayed());
+
+                    if (audioSource != null)
+                    {
+                        audioSource.Play();
+                    }
                 }
                 else
                 {

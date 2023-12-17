@@ -14,18 +14,28 @@ public class BrawlerCharacter : MonoBehaviour
     private VisualBrawlerData myVisualBrawler;
     private Animator animator;
     private BrawlerData myBrawlerData;
+    private AudioSource audioSource;
+
+    public AudioClip hackClip;
+    public AudioClip saberClip;
+    public AudioClip pistolClip;
+    public AudioClip katanaClip;
+    public AudioClip laserClip;
+    public AudioClip virusClip;
 
     public BrawlerData MyBrawlerData { get => myBrawlerData; set => myBrawlerData = value; }
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
         animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
     }
 
     private void OnEnable()
     {
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
         animator.SetFloat("offset", UnityEngine.Random.Range(0, 1f));
     }
 
@@ -78,23 +88,31 @@ public class BrawlerCharacter : MonoBehaviour
         {
             case BrawlerData.BrawlerType.Hack:
                 abilityAnimator.SetTrigger("hack");
+                audioSource.clip = hackClip;
                 break;
             case BrawlerData.BrawlerType.Saber:
                 abilityAnimator.SetTrigger("saber");
+                audioSource.clip = saberClip;
                 break;
             case BrawlerData.BrawlerType.Pistol:
                 abilityAnimator.SetTrigger("pistol");
+                audioSource.clip = pistolClip;
                 break;
             case BrawlerData.BrawlerType.Katana:
                 abilityAnimator.SetTrigger("katana");
+                audioSource.clip = katanaClip;
                 break;
             case BrawlerData.BrawlerType.Laser:
                 abilityAnimator.SetTrigger("laser");
+                audioSource.clip = laserClip;
                 break;
             case BrawlerData.BrawlerType.Virus:
                 abilityAnimator.SetTrigger("virus");
+                audioSource.clip = virusClip;
                 break;
         }
+
+        audioSource.Play();
     }
 
     [Serializable]

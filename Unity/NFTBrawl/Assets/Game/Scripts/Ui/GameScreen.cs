@@ -76,12 +76,14 @@ public class GameScreen : MonoBehaviour
     private List<PublicKey> myBrawlersPubKeys = new();
 
     private List<BrawlerData> activeGameBrawlers = new();
+    private PublicKey activeGameWinner;
 
     private bool initialSubcribed;
     private Coroutine errorRoutine;
 
     public List<BrawlerData> MyBrawlers { get => myBrawlers; set => myBrawlers = value; }
     public List<BrawlerData> ActiveGameBrawlers { get => activeGameBrawlers; set => activeGameBrawlers = value; }
+    public PublicKey ActiveGameWinner { get => activeGameWinner; set => activeGameWinner = value; }
 
     public bool IsPlayingOutBattle { get; set; }
 
@@ -203,6 +205,10 @@ public class GameScreen : MonoBehaviour
                 PendingLobby = colosseum.PendingBrawls[0];
                 PendingLobbyRetrieved?.Invoke(colosseum.PendingBrawls[0]);
             }
+            else
+            {
+                profileScreen.createNewBrawl.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -217,10 +223,13 @@ public class GameScreen : MonoBehaviour
 
     void Update()
     {
-        //if (Input.GetKeyUp(KeyCode.L))
-        //{
-        //    OpenBrawl();
-        //}
+        if (Input.GetKeyUp(KeyCode.L))
+        {
+            AudioManager.instance.PlayBattleMusic();
+            DisableAllScreens();
+            brawlScreen.Toggle(true);
+            brawlScreen.PlayOutFights(MyBrawlers.Take(8).ToList(), MyBrawlers[UnityEngine.Random.Range(0, MyBrawlers.Count)].brawlerKey, MyBrawlers[0].brawlerKey);
+        }
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -275,10 +284,23 @@ public class GameScreen : MonoBehaviour
     {
         if (ActiveGameBrawlers.Count > 0)
         {
-            AudioManager.instance.PlayBattleMusic();
-            DisableAllScreens();
-            brawlScreen.Toggle(true);
-            brawlScreen.PlayOutFights(ActiveGameBrawlers.Take(8).ToList(), myBrawlers[UnityEngine.Random.Range(0, myBrawlers.Count)].brawlerKey, myBrawlers[0].brawlerKey);
+            BrawlerData myBrawlerEntry = ActiveGameBrawlers.First(b => b.ownerKey == Web3.Account.PublicKey);
+
+            if (myBrawlerEntry != null)
+            {
+                AudioManager.instance.PlayBattleMusic();
+                DisableAllScreens();
+                brawlScreen.Toggle(true);
+                brawlScreen.PlayOutFights(ActiveGameBrawlers.Take(8).ToList(), ActiveGameWinner, myBrawlerEntry.brawlerKey);
+            }
+            else
+            {
+                ShowError("Trying view a brawl but you don't own any of the participants.", 4f);
+            }
+        }
+        else
+        {
+            ShowError("Trying to start all brawl with no participants", 4f);
         }
     }
 

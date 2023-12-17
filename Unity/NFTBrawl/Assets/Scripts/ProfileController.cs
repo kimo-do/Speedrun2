@@ -4,6 +4,7 @@ using Solana.Unity.Wallet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public class ProfileController : Window
     public RectTransform noBrawlers;
     public RectTransform openLobby;
     public GameObject yourBrawlers;
+    public TMP_Text infoLabel;
 
     public List<GameObject> gameObjects; // List of GameObjects to layout
     public int columns = 5; // Number of columns in the grid
@@ -56,9 +58,9 @@ public class ProfileController : Window
         openLobby.gameObject.SetActive(false);
         joinOpenLobbyButton.gameObject.SetActive(false);
         joinOpenLobbyButton.interactable = false;
-        createNewBrawl.gameObject.SetActive(true);
+        createNewBrawl.gameObject.SetActive(false);
 
-        if (gameObjects.Count > 0)
+        if (GameScreen.instance.MyBrawlers.Count > 0)
         {
             joinOpenLobbyButton.interactable = true;
         }
@@ -67,6 +69,12 @@ public class ProfileController : Window
         {
             openLobby.gameObject.SetActive(true);
             joinOpenLobbyButton.gameObject.SetActive(true);
+            infoLabel.text = "Pending brawl found:";
+        }
+        else
+        {
+            createNewBrawl.gameObject.SetActive(true);
+            infoLabel.text = "There is no pending brawl.";
         }
     }
 
@@ -116,6 +124,10 @@ public class ProfileController : Window
                 GameScreen.instance.ShowError("No brawlers available!", 2f);
             }
         }
+        else
+        {
+            GameScreen.instance.ShowError("No pending lobby found!", 2f);
+        }
     }
 
     private void OnPendingLobbyFound(PublicKey lobbyPubkey)
@@ -146,6 +158,8 @@ public class ProfileController : Window
         {
             Debug.Log($"Fetched active brawl: {brawl.ToString()}, Players: {activeBrawl.Queue.Length}");
             Debug.Log($"Fetching all brawlers..");
+
+            GameScreen.instance.ActiveGameWinner = activeBrawl.Winner;
 
             List<Brawler> brawlers = await BrawlAnchorService.Instance.FetchAllBrawlersFromBrawl(activeBrawl);
 
