@@ -25,6 +25,7 @@ using Deathbattle;
 using Deathbattle.Accounts;
 using Deathbattle.Program;
 using Deathbattle.Types;
+using System.Linq;
 
 public class BrawlAnchorService : MonoBehaviour
 {
@@ -776,6 +777,60 @@ public class BrawlAnchorService : MonoBehaviour
 
         bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "create_clone",
             () => { Debug.Log("Create clone was successful"); }, s => { Debug.LogError("Create Clone was not successful"); });
+    }
+
+    public async void ReviveBrawler(bool useSession, Action onSuccess)
+    {
+        if (!Instance.IsSessionValid())
+        {
+            await Instance.UpdateSessionValid();
+            ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
+            return;
+        }
+
+        PublicKey BrawlerPDA = CurrentGraveyard.Brawlers.ElementAt(0);
+
+        var tx = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash()
+        };
+
+        // PublicKey.TryFindProgramAddress(new[]
+        //         {Encoding.UTF8.GetBytes("brawler"), BrawlAnchorService.Instance.CloneLabPDA.KeyBytes, BitConverter.GetBytes(BrawlAnchorService.Instance.CurrentCloneLab.NumBrawlers)},
+        //     BrawlAnchorService.AnchorProgramIdPubKey, out BrawlerPDA, out byte brawlerBump);
+
+        ReviveCloneAccounts rcAccounts = new ReviveCloneAccounts
+        {
+            CloneLab = CloneLabPDA,
+            Graveyard = GraveyardPDA,
+            Brawler = BrawlerPDA,
+            Profile = ProfilePDA,
+            Payer = Web3.Account.PublicKey,
+            SystemProgram = SystemProgram.ProgramIdKey,
+        };
+
+        var initTx = DeathbattleProgram.ReviveClone(rcAccounts, BrawlAnchorService.AnchorProgramIdPubKey);
+        tx.Add(initTx);
+
+        if (true)
+        {
+            if (!(await BrawlAnchorService.Instance.IsSessionTokenInitialized()))
+            {
+                var topUp = true;
+
+                var validity = BrawlAnchorService.Instance.GetSessionKeysEndTime();
+                var createSessionIX = BrawlAnchorService.Instance.sessionWallet.CreateSessionIX(topUp, validity);
+                rcAccounts.Payer = Web3.Account.PublicKey;
+                tx.Add(createSessionIX);
+                Debug.Log("Has no session -> partial sign");
+                tx.PartialSign(new[] { Web3.Account, BrawlAnchorService.Instance.sessionWallet.Account });
+            }
+        }
+
+        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "revive_clone",
+            () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
     }
 
     public async void ChopTree(bool useSession, Action onSuccess)

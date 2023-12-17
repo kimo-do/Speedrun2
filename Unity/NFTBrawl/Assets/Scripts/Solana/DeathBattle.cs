@@ -386,7 +386,11 @@ namespace Deathbattle
             Male1,
             Female1,
             Bonki,
-            SolBlaze
+            SolBlaze,
+            Male2,
+            Female2,
+            Cop,
+            Gangster
         }
 
         public enum BrawlerType : byte
@@ -628,6 +632,12 @@ namespace Deathbattle
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
+        public async Task<RequestResult<string>> SendReviveCloneAsync(ReviveCloneAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.ReviveClone(accounts, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
         public async Task<RequestResult<string>> SendStartBrawlAsync(StartBrawlAccounts accounts, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
         {
             Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.DeathbattleProgram.StartBrawl(accounts, programId);
@@ -703,6 +713,21 @@ namespace Deathbattle
             public PublicKey SystemProgram { get; set; }
 
             public PublicKey SlotHashes { get; set; }
+        }
+
+        public class ReviveCloneAccounts
+        {
+            public PublicKey CloneLab { get; set; }
+
+            public PublicKey Graveyard { get; set; }
+
+            public PublicKey Brawler { get; set; }
+
+            public PublicKey Profile { get; set; }
+
+            public PublicKey Payer { get; set; }
+
+            public PublicKey SystemProgram { get; set; }
         }
 
         public class StartBrawlAccounts
@@ -808,6 +833,19 @@ namespace Deathbattle
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(16122771911115072516UL, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ReviveClone(ReviveCloneAccounts accounts, PublicKey programId)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.CloneLab, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Graveyard, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Brawler, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Profile, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(8007496213246540780UL, offset);
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
