@@ -389,7 +389,7 @@ public class BrawlAnchorService : MonoBehaviour
     {
         Debug.Log($"Socket Message: Colosseum found pending lobbies: {colosseum.PendingBrawls.Length}.");
         Debug.Log($"Socket Message: Colosseum found active lobbies: {colosseum.ActiveBrawls.Length}.");
-        Debug.Log($"Socket Message: Colosseum found total lobbies: {colosseum.NumBrawls}.");
+        Debug.Log($"Socket Message: Colosseum found total lobbies: {colosseum.EndedBrawls.Length}.");
 
         CurrentColosseum = colosseum;
         OnColosseumChanged?.Invoke(colosseum);
