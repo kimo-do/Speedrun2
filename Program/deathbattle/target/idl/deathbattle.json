@@ -173,6 +173,57 @@
       "args": []
     },
     {
+      "name": "reviveClone",
+      "accounts": [
+        {
+          "name": "cloneLab",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone Lab account. This will be used to store the clone."
+          ]
+        },
+        {
+          "name": "graveyard",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Graveyard account. This will be where the clone is revived from."
+          ]
+        },
+        {
+          "name": "brawler",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Clone account. This is the account that will be created."
+          ]
+        },
+        {
+          "name": "profile",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The profile of the owner of the new clone."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The player who is creating the clone and adding it to the Clone Lab."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "startBrawl",
       "accounts": [
         {

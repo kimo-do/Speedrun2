@@ -68,7 +68,7 @@ impl<'info> ReviveClone<'info> {
         ctx.accounts.brawler.owner = ctx.accounts.payer.key();
         ctx.accounts.brawler.name = ctx.accounts.profile.username.clone();
 
-        // Transfer 0.01 SOL fee to the Clone Lab.
+        // Transfer 0.05 SOL fee to the Clone Lab.
         let ix = system_instruction::transfer(
             &ctx.accounts.payer.key(),
             &ctx.accounts.clone_lab.key(),

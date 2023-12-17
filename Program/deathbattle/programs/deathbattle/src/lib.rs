@@ -38,6 +38,10 @@ pub mod deathbattle {
         CreateClone::handler(ctx)
     }
 
+    pub fn revive_clone(ctx: Context<ReviveClone>) -> Result<()> {
+        ReviveClone::handler(ctx)
+    }
+
     pub fn start_brawl(ctx: Context<StartBrawl>) -> Result<()> {
         StartBrawl::handler(ctx)
     }
