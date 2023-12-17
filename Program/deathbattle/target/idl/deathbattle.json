@@ -580,6 +580,18 @@
           },
           {
             "name": "SolBlaze"
+          },
+          {
+            "name": "Male2"
+          },
+          {
+            "name": "Female2"
+          },
+          {
+            "name": "Cop"
+          },
+          {
+            "name": "Gangster"
           }
         ]
       }

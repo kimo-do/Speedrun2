@@ -72,7 +72,7 @@ impl<'info> ReviveClone<'info> {
         let ix = system_instruction::transfer(
             &ctx.accounts.payer.key(),
             &ctx.accounts.clone_lab.key(),
-            10_000_000,
+            50_000_000,
         );
 
         invoke(
