@@ -856,6 +856,7 @@ public class BrawlAnchorService : MonoBehaviour
         RunMatchAccounts rmAccounts = new RunMatchAccounts
         {
             CloneLab = CloneLabPDA,
+            Colosseum = ColosseumPDA,
             Graveyard = GraveyardPDA,
             Brawl = brawlPDA,
             Payer = Web3.Account.PublicKey,
