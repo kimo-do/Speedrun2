@@ -594,6 +594,29 @@ public class BrawlAnchorService : MonoBehaviour
         Debug.Log("Session closed");
     }
 
+    public async void StartBrawl(PublicKey brawlPDA)
+    {
+        var transaction = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash(maxSeconds: 15)
+        };
+
+        StartBrawlAccounts startBrawlAccounts = new StartBrawlAccounts
+        {
+            Brawl = brawlPDA,
+            Colosseum = ColosseumPDA,
+            Payer = Web3.Account,
+            SystemProgram = SystemProgram.ProgramIdKey
+        };
+
+        var startBrawlIX = DeathbattleProgram.StartBrawl(startBrawlAccounts, AnchorProgramIdPubKey);
+        transaction.Add(startBrawlIX);
+        Debug.Log("Sign and send start brawl");
+        await SendAndConfirmTransaction(Web3.Wallet, transaction, "Start brawl.");
+    }
+
     //public async void JoinBrawl(bool useSession, PublicKey brawler, PublicKey pendingBrawlLobby, Action onSuccess)
     //{
     //    if (!Instance.IsSessionValid())
