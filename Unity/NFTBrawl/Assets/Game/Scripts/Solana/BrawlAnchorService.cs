@@ -395,17 +395,77 @@ public class BrawlAnchorService : MonoBehaviour
 
     public async Task<List<Brawler>> FetchAllReadyBrawlers(CloneLab cloneLab)
     {
-        List<Brawler> readyBrawlers = new List<Brawler>();
+        List<Brawler> brawlers = new List<Brawler>();
         foreach (var brawler in cloneLab.Brawlers)
         {
             var brawlerData = await anchorClient.GetBrawlerAsync(brawler, Commitment.Confirmed);
             if (brawlerData.ParsedResult != null && brawlerData.ParsedResult.Owner == Web3.Account.PublicKey)
             {
-                readyBrawlers.Add(brawlerData.ParsedResult);
+                brawlers.Add(brawlerData.ParsedResult);
             }
         }
 
-        return readyBrawlers;
+        return brawlers;
+    }
+
+    public async Task<List<Brawler>> FetchAllBrawlersFromBrawl(Brawl brawl)
+    {
+        List<Brawler> brawlers = new List<Brawler>();
+        foreach (var brawler in brawl.Queue)
+        {
+            var brawlerData = await anchorClient.GetBrawlerAsync(brawler, Commitment.Confirmed);
+            if (brawlerData.ParsedResult != null)
+            {
+                brawlers.Add(brawlerData.ParsedResult);
+            }
+        }
+
+        return brawlers;
+    }
+
+    public async Task<List<Brawler>> FetchAllDeadBrawlers(Graveyard graveyard)
+    {
+        List<Brawler> brawlers = new List<Brawler>();
+        foreach (var brawler in graveyard.Brawlers)
+        {
+            var brawlerData = await anchorClient.GetBrawlerAsync(brawler, Commitment.Confirmed);
+            if (brawlerData.ParsedResult != null)
+            {
+                brawlers.Add(brawlerData.ParsedResult);
+            }
+        }
+
+        return brawlers;
+    }
+
+    public async Task<List<Brawl>> FetchAllPendingBrawls(Colosseum colosseum)
+    {
+        List<Brawl> brawls = new List<Brawl>();
+        foreach (var brawl in colosseum.PendingBrawls)
+        {
+            var brawlData = await anchorClient.GetBrawlAsync(brawl, Commitment.Confirmed);
+            if (brawlData.ParsedResult != null)
+            {
+                brawls.Add(brawlData.ParsedResult);
+            }
+        }
+
+        return brawls;
+    }
+
+    public async Task<List<Brawl>> FetchAllActiveBrawls(Colosseum colosseum)
+    {
+        List<Brawl> brawls = new List<Brawl>();
+        foreach (var brawl in colosseum.ActiveBrawls)
+        {
+            var brawlData = await anchorClient.GetBrawlAsync(brawl, Commitment.Confirmed);
+            if (brawlData.ParsedResult != null)
+            {
+                brawls.Add(brawlData.ParsedResult);
+            }
+        }
+
+        return brawls;
     }
 
     public async Task<Brawler> FetchBrawler(PublicKey brawler)
