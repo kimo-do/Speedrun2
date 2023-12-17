@@ -619,7 +619,7 @@ public class BrawlAnchorService : MonoBehaviour
         };
 
         PublicKey.TryFindProgramAddress(new[]
-               {Encoding.UTF8.GetBytes("brawler"), ColosseumPDA.KeyBytes, BitConverter.GetBytes(CurrentColosseum.NumBrawls - 1)},
+               {Encoding.UTF8.GetBytes("brawler"), ColosseumPDA.KeyBytes, BitConverter.GetBytes(CurrentColosseum.NumBrawls)},
            AnchorProgramIdPubKey, out BrawlPDA, out byte brawlBump);
 
         StartBrawlAccounts startBrawlAccounts = new StartBrawlAccounts
