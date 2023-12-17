@@ -833,6 +833,57 @@ public class BrawlAnchorService : MonoBehaviour
             () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
     }
 
+    public async void RunMatch(bool useSession, Action onSuccess, PublicKey brawlPDA)
+    {
+        if (!Instance.IsSessionValid())
+        {
+            await Instance.UpdateSessionValid();
+            ServiceFactory.Resolve<UiService>().OpenPopup(UiService.ScreenType.SessionPopup, new SessionPopupUiData());
+            return;
+        }
+
+        var tx = new Transaction()
+        {
+            FeePayer = Web3.Account,
+            Instructions = new List<TransactionInstruction>(),
+            RecentBlockHash = await Web3.BlockHash()
+        };
+
+        // PublicKey.TryFindProgramAddress(new[]
+        //         {Encoding.UTF8.GetBytes("brawler"), BrawlAnchorService.Instance.CloneLabPDA.KeyBytes, BitConverter.GetBytes(BrawlAnchorService.Instance.CurrentCloneLab.NumBrawlers)},
+        //     BrawlAnchorService.AnchorProgramIdPubKey, out BrawlerPDA, out byte brawlerBump);
+
+        RunMatchAccounts rmAccounts = new RunMatchAccounts
+        {
+            CloneLab = CloneLabPDA,
+            Graveyard = GraveyardPDA,
+            Brawl = brawlPDA,
+            Payer = Web3.Account.PublicKey,
+            SystemProgram = SystemProgram.ProgramIdKey,
+        };
+
+        var initTx = DeathbattleProgram.RunMatch(rmAccounts, BrawlAnchorService.AnchorProgramIdPubKey);
+        tx.Add(initTx);
+
+        if (true)
+        {
+            if (!(await BrawlAnchorService.Instance.IsSessionTokenInitialized()))
+            {
+                var topUp = true;
+
+                var validity = BrawlAnchorService.Instance.GetSessionKeysEndTime();
+                var createSessionIX = BrawlAnchorService.Instance.sessionWallet.CreateSessionIX(topUp, validity);
+                rmAccounts.Payer = Web3.Account.PublicKey;
+                tx.Add(createSessionIX);
+                Debug.Log("Has no session -> partial sign");
+                tx.PartialSign(new[] { Web3.Account, BrawlAnchorService.Instance.sessionWallet.Account });
+            }
+        }
+
+        bool success = await BrawlAnchorService.Instance.SendAndConfirmTransaction(Web3.Wallet, tx, "revive_clone",
+            () => { Debug.Log("Revive clone was successful"); }, s => { Debug.LogError("Revive Clone was not successful"); });
+    }
+
     public async void ChopTree(bool useSession, Action onSuccess)
     {
         if (!Instance.IsSessionValid())
