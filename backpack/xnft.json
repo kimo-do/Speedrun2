@@ -1,8 +1,8 @@
 {
-  "name": "Clash of Clones",
-  "version": "0.0.1",
+  "name": "Rebirth Rumble",
+  "version": "0.1.7",
   "storage": "aws",
-  "description": "Clone brawl raffle game",
+  "description": "Cyber-Brawls on Solana.",
   "website": "https://discord.gg/UfWARJfjTu",
   "kind": "app",
   "tag": "game",
@@ -11,7 +11,10 @@
   },
   "contact": "kimosabe.crypto@gmail.com",
   "screenshots": [
-    "./assets/screenshot1.png"
+    "./assets/screenshot1.png",
+    "./assets/screenshot2.png",
+    "./assets/screenshot3.png",
+    "./assets/screenshot4.png"
   ],
   "entrypoints": {
     "default": {
